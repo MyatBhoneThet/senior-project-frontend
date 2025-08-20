@@ -11,8 +11,6 @@ import DeleteAlert from '../../components/layouts/DeleteAlert'
 import { useState, useEffect } from 'react'
 import ExpenseOverview from '../../components/Expense/ExpenseOverview'
 
-
-
 const Expense = () => {
 
   useUserAuth();
