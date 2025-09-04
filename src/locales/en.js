@@ -33,6 +33,7 @@ export default {
     income: "Income",
     expense: "Expense",
     settings: "Settings",
-    logout: "Log out"
+    logout: "Log out",
+    recurring: "Recurring"
   }
 };

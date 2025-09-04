@@ -31,6 +31,8 @@ export default {
     income: "รายได้",
     expense: "ค่าใช้จ่าย",
     settings: "การตั้งค่า",
-    logout: "ออกจากระบบ"
+    logout: "ออกจากระบบ",
+    recurring: "เกิดซ้ำ",
+    profile: "โปรไฟล์"
   }
 };

@@ -1,28 +1,36 @@
-import React from 'react'
+import React, { useContext } from 'react';
+import { Outlet } from 'react-router-dom';
 import { UserContext } from '../../context/UserContext';
-import { useContext } from 'react';
+
 import Navbar from './Navbar';
 import SideMenu from './SideMenu';
-import { Outlet } from 'react-router-dom';
-
-const DashboardLayout = ({children, activeMenu}) => {
-    const { user } = useContext(UserContext);
-    return (
-        <div className=''>
-            <Navbar activeMenu={activeMenu} />
+import ChatWidget from '../Chat/ChatWidget';
 
 
-            {user && (
-                <div className='flex'>
-                    <div className='max-[1080px]:hidden'>
-                        <SideMenu activeMenu ={activeMenu} />
-                    </div>
+export default function DashboardLayout({ children, activeMenu }) {
+  const { user } = useContext(UserContext);
 
-                    <div className='grow mx-5'>{children}</div>
-                </div>
-            )}
-        </div>
-    )
+  return (
+    <div className="min-h-screen bg-[#fcfbfc] flex flex-col">
+      {/* Top bar */}
+      <Navbar activeMenu={activeMenu} />
+
+      {/* Body */}
+      <div className="flex flex-1">
+        {/* Side menu (hidden below 1080px, like you had) */}
+        <aside className="max-[1080px]:hidden w-[260px] shrink-0 bg-white border-r">
+          <SideMenu activeMenu={activeMenu} />
+        </aside>
+
+        {/* Main content */}
+        <main className="grow mx-5 my-4">
+          {/* Works with either children or nested routes */}
+          {children ?? <Outlet />}
+        </main>
+      </div>
+
+      {/* Floating chat bubble in the footer/right — only when logged in */}
+      {user && <ChatWidget side="left" />}
+    </div>
+  );
 }
-
-export default DashboardLayout;

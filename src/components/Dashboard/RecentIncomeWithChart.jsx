@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from 'react';
 import CustomPieChart from '../Charts/CustomPieChart';
-import { UserContext } from '../../context/UserContext'; // adjust path if needed
+import { UserContext } from '../../context/UserContext'; 
 import useT from '../../hooks/useT';
 
 // Currency symbol mapping

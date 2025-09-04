@@ -31,6 +31,8 @@ export default {
     income: "ဝင်ငွေ",
     expense: "စာရင်းအသုံးစရိတ်",
     settings: "ဆက်တင်များ",
-    logout: "ထွက်မည်"
+    logout: "ထွက်မည်",
+    recurring: "အကြိမ်ကြိမ်ဖြစ်သော",
+    profile: "ကိုယ်ရေးအကျဉ်း"
   }
 };

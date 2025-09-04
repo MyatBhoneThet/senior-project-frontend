@@ -102,6 +102,8 @@ import Expense from './pages/Dashboard/Expense';
 import Settings from './pages/Dashboard/Settings';
 import UserProvider from './context/UserContext';
 import { Toaster } from 'react-hot-toast';
+import ProfilePage from './pages/Dashboard/ProfilePage';
+import RecurringPage from './pages/Dashboard/Recurring';
 
 // Protected Route component
 const ProtectedRoute = ({ children }) => {
@@ -125,6 +127,8 @@ const App = () => {
         {/* Public auth routes */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
+        {/* <Route path="/recurring" element={<RecurringPage />} /> */}
+        
 
         {/* Protected app routes */}
         <Route
@@ -156,6 +160,22 @@ const App = () => {
           element={
             <ProtectedRoute>
               <Settings />
+            </ProtectedRoute>
+          }
+        />
+         <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+          <Route
+          path="/recurring"
+          element={
+            <ProtectedRoute>
+              <RecurringPage />
             </ProtectedRoute>
           }
         />
