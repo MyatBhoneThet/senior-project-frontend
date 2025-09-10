@@ -121,70 +121,72 @@
 //   );
 // }
 
-import React, { useContext, useMemo } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import { SIDE_MENU_DATA } from '../../utils/data';
-import { UserContext } from '../../context/UserContext';
-import CharAvatar from '../Cards/CharAvatar';
-import useT from '../../hooks/useT';
-import { LuRefreshCcw } from 'react-icons/lu';
+import React, { useContext, useMemo } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { SIDE_MENU_DATA } from "../../utils/data";
+import { UserContext } from "../../context/UserContext";
+import CharAvatar from "../Cards/CharAvatar";
+import useT from "../../hooks/useT";
+import { LuRefreshCcw } from "react-icons/lu";
+
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 const baseItem =
-  'w-full flex items-center gap-4 text-[15px] py-3 px-6 rounded-lg mb-3 transition';
+  "w-full flex items-center gap-4 text-[15px] py-3 px-6 rounded-lg mb-3 transition";
 
 export default function SideMenu() {
   const { user, clearUser, prefs } = useContext(UserContext);
   const { t } = useT();
   const navigate = useNavigate();
 
-  const isDarkTheme = prefs?.theme === 'dark';
-  const activeItem = 'text-white bg-primary';
+  const isDarkTheme = prefs?.theme === "dark";
+  const activeItem = "text-white bg-primary";
   const idleItem = isDarkTheme
-    ? 'text-gray-300 hover:bg-gray-700'
-    : 'text-slate-800 hover:bg-gray-100';
+    ? "text-gray-300 hover:bg-gray-700"
+    : "text-slate-800 hover:bg-gray-100";
   const containerClass = isDarkTheme
-    ? 'w-64 h-[calc(100vh-64px)] bg-gray-900 border-r border-gray-700/50 p-5 sticky top-[64px] z-20'
-    : 'w-64 h-[calc(100vh-64px)] bg-white border-r border-gray-200/50 p-5 sticky top-[64px] z-20';
+    ? "w-64 h-[calc(100vh-64px)] bg-gray-900 border-r border-gray-700/50 p-5 sticky top-[64px] z-20"
+    : "w-64 h-[calc(100vh-64px)] bg-white border-r border-gray-200/50 p-5 sticky top-[64px] z-20";
   const userNameClass = isDarkTheme
-    ? 'text-gray-100 font-medium leading-6'
-    : 'text-gray-950 font-medium leading-6';
-  const avatarBgClass = isDarkTheme ? 'bg-gray-700' : 'bg-slate-400';
+    ? "text-gray-100 font-medium leading-6"
+    : "text-gray-950 font-medium leading-6";
+  const avatarBgClass = isDarkTheme ? "bg-gray-700" : "bg-slate-400";
 
   const pathToI18nKey = (path) => {
     switch (path) {
-      case '/dashboard':
-        return 'menu.dashboard';
-      case '/income':
-        return 'menu.income';
-      case '/expense':
-        return 'menu.expense';
-      case '/settings':
-        return 'menu.settings';
-      case '/recurring':
-        return 'menu.recurring';
-      case '/profile':
-        return 'menu.profile';
-      case 'logout':
-        return 'menu.logout';
+      case "/dashboard":
+        return "menu.dashboard";
+      case "/income":
+        return "menu.income";
+      case "/expense":
+        return "menu.expense";
+      case "/settings":
+        return "menu.settings";
+      case "/recurring":
+        return "menu.recurring";
+      case "/profile":
+        return "menu.profile";
+      case "logout":
+        return "menu.logout";
       default:
         return null;
     }
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
+    localStorage.removeItem("token");
     clearUser?.();
-    navigate('/login');
+    navigate("/login");
   };
 
   const menuItems = useMemo(() => {
-    const hasRecurring = SIDE_MENU_DATA?.some((i) => i?.path === '/recurring');
+    const hasRecurring = SIDE_MENU_DATA?.some((i) => i?.path === "/recurring");
     const base = Array.isArray(SIDE_MENU_DATA) ? [...SIDE_MENU_DATA] : [];
     if (!hasRecurring) {
       base.splice(1, 0, {
-        path: '/recurring',
-        label: 'Recurring',
-        i18nKey: 'menu.recurring',
+        path: "/recurring",
+        label: "Recurring",
+        i18nKey: "menu.recurring",
         icon: LuRefreshCcw,
       });
     }
@@ -195,20 +197,25 @@ export default function SideMenu() {
     const key = item.i18nKey || pathToI18nKey(item.path);
     if (key) {
       const translated = t(key);
-      if (!translated || translated === key || translated.includes('.')) {
-        return item.label ?? 'Recurring';
+      if (!translated || translated === key || translated.includes(".")) {
+        return item.label ?? "Recurring";
       }
       return translated;
     }
-    return item.label ?? 'Recurring';
+    return item.label ?? "Recurring";
   };
+
+  // ✅ Use backend URL if profilePhoto exists
+  const photoUrl = user?.profilePhoto
+  ? `${BACKEND_URL}/api/v1/users/photo/${user._id}`
+  : null;
 
   return (
     <div className={containerClass}>
       <div className="flex flex-col items-center justify-center gap-3 mt-3 mb-7">
-        {user?.profilePhoto ? (
+        {photoUrl ? (
           <img
-            src={user.profilePhoto}
+            src={photoUrl}
             alt="Profile"
             className={`w-20 h-20 ${avatarBgClass} rounded-full object-cover`}
           />
@@ -220,14 +227,14 @@ export default function SideMenu() {
             style="text-xl"
           />
         )}
-        <h5 className={userNameClass}>{user?.fullName || ''}</h5>
+        <h5 className={userNameClass}>{user?.fullName || ""}</h5>
       </div>
 
       {menuItems.map((item, idx) => {
         const labelText = getLabel(item);
         const Icon = item.icon;
 
-        if (item.path === 'logout') {
+        if (item.path === "logout") {
           return (
             <button
               key={`menu_${idx}`}

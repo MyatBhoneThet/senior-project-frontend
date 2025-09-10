@@ -1,41 +1,22 @@
-// import React, { useState, useEffect } from "react";
+// // pages/ProfilePage.jsx
+// import React, { useState, useEffect, useContext } from "react";
 // import ProfilePhotoSelector from "../../components/Inputs/ProfilePhotoSelector";
 // import axiosInstance from "../../utils/axiosInstance";
 // import API_PATHS from "../../utils/apiPaths";
+// import { UserContext } from "../../context/UserContext";
 
 // const ProfilePage = () => {
-//   const [user, setUser] = useState(null);
+//   const { user, updateUser } = useContext(UserContext); // use global user
 //   const [formData, setFormData] = useState({});
 //   const [saving, setSaving] = useState(false);
 
-//   useEffect(() => {
-//     axiosInstance
-//       .get(API_PATHS.USER.ME)
-//       .then((res) => {
-//         const userData = res.data;
-
-//         const transformedData = {
-//           ...userData,
-//           gender: transformGenderValue(userData.gender),
-//           profilePhoto: normalizePhoto(userData.profilePhoto),
-//         };
-
-//         setUser(transformedData);
-//         // only set formData once on first load
-//         setFormData((prev) =>
-//           Object.keys(prev).length === 0 ? transformedData : prev
-//         );
-//       })
-//       .catch((err) => console.error("Failed to fetch user profile", err));
-//   }, []);
-
+//   // Normalize photo URLs
 //   const normalizePhoto = (photoPath) => {
 //     if (!photoPath) return null;
-//     return photoPath.startsWith("http")
-//       ? photoPath
-//       : `http://localhost:8000/${photoPath}`;
+//     return photoPath.startsWith("http") ? photoPath : `http://localhost:8000/${photoPath}`;
 //   };
 
+//   // Map backend gender values
 //   const transformGenderValue = (backendValue) => {
 //     const genderMap = {
 //       male: "Male",
@@ -50,20 +31,31 @@
 //     return genderMap[backendValue] || "Prefer not to say";
 //   };
 
+//   // Fetch user profile on mount
+//   useEffect(() => {
+//     axiosInstance
+//       .get(API_PATHS.USER.ME)
+//       .then((res) => {
+//         const userData = res.data;
+//         const transformedData = {
+//           ...userData,
+//           gender: transformGenderValue(userData.gender),
+//           profilePhoto: normalizePhoto(userData.profilePhoto),
+//         };
+//         updateUser(transformedData); // update global context
+//         setFormData((prev) => (Object.keys(prev).length === 0 ? transformedData : prev));
+//       })
+//       .catch((err) => console.error("Failed to fetch user profile", err));
+//   }, []);
+
 //   const handleChange = (e) => {
 //     const { name, value } = e.target;
 
 //     if (name.startsWith("contact.")) {
 //       const field = name.split(".")[1];
-//       setFormData((prev) => ({
-//         ...prev,
-//         contact: { ...prev.contact, [field]: value },
-//       }));
+//       setFormData((prev) => ({ ...prev, contact: { ...prev.contact, [field]: value } }));
 //     } else if (name === "interests") {
-//       const interestsArray = value
-//         .split(",")
-//         .map((item) => item.trim())
-//         .filter(Boolean);
+//       const interestsArray = value.split(",").map((item) => item.trim()).filter(Boolean);
 //       setFormData((prev) => ({ ...prev, interests: interestsArray }));
 //     } else if (name === "accomplishments") {
 //       const accomplishmentsArray = value.split("\n").filter(Boolean);
@@ -81,22 +73,16 @@
 //     data.append("profilePhoto", file);
 
 //     const previewUrl = URL.createObjectURL(file);
-
-//     // show preview immediately
-//     setUser((prev) => ({ ...prev, profilePhoto: previewUrl }));
+//     updateUser({ ...user, profilePhoto: previewUrl }); // preview in sidebar
 //     setFormData((prev) => ({ ...prev, profilePhoto: previewUrl }));
 
 //     try {
 //       const res = await axiosInstance.post("/api/v1/users/me/photo", data, {
 //         headers: { "Content-Type": "multipart/form-data" },
 //       });
-
 //       const finalUrl = normalizePhoto(res.data.user.profilePhoto);
-
-//       setUser((prev) => ({ ...prev, profilePhoto: finalUrl }));
+//       updateUser({ ...user, profilePhoto: finalUrl }); // final photo
 //       setFormData((prev) => ({ ...prev, profilePhoto: finalUrl }));
-
-//       console.log("Photo uploaded successfully:", finalUrl);
 //     } catch (err) {
 //       console.error("Photo upload failed:", err.response?.data || err.message);
 //       alert("Failed to upload photo. You can still save your profile without it.");
@@ -106,20 +92,13 @@
 //   const handleRemovePhoto = async () => {
 //     try {
 //       const res = await axiosInstance.delete("/api/v1/users/me/photo");
-
-//       const updatedUser = {
-//         ...res.data.user,
-//         profilePhoto: null,
-//       };
-
-//       setUser(updatedUser);
+//       const updatedUser = { ...res.data.user, profilePhoto: null };
+//       updateUser(updatedUser);
 //       setFormData(updatedUser);
-
-//       console.log("Photo removed successfully");
 //     } catch (err) {
 //       console.error("Photo remove failed:", err.response?.data || err.message);
+//       updateUser({ ...user, profilePhoto: null });
 //       setFormData((prev) => ({ ...prev, profilePhoto: null }));
-//       setUser((prev) => ({ ...prev, profilePhoto: null }));
 //     }
 //   };
 
@@ -128,32 +107,21 @@
 //     setSaving(true);
 
 //     const correctedGender = transformGenderValue(formData.gender);
-
-//     const submitData = {
-//       ...formData,
-//       age: formData.age ? Number(formData.age) : undefined,
-//       gender: correctedGender,
-//     };
+//     const submitData = { ...formData, age: formData.age ? Number(formData.age) : undefined, gender: correctedGender };
 
 //     axiosInstance
 //       .put("/api/v1/auth/me", submitData)
 //       .then((res) => {
-//         setUser(res.data);
+//         updateUser(res.data); // update global context
 //         setFormData(res.data);
 //         alert("Profile updated successfully");
 //       })
 //       .catch((err) => {
 //         console.error("Update error:", err);
-//         const errorMessage =
-//           err.response?.data?.message ||
-//           err.response?.data?.error ||
-//           err.message ||
-//           "Failed to save profile";
+//         const errorMessage = err.response?.data?.message || err.response?.data?.error || err.message || "Failed to save profile";
 //         alert(`Error: ${errorMessage}`);
 //       })
-//       .finally(() => {
-//         setSaving(false);
-//       });
+//       .finally(() => setSaving(false));
 //   };
 
 //   if (!user) {
@@ -184,72 +152,32 @@
 //             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 //               {/* Name */}
 //               <div className="space-y-2">
-//                 <label className="block text-sm font-medium text-gray-700">
-//                   Name
-//                 </label>
-//                 <input
-//                   name="name"
-//                   value={formData.name || ""}
-//                   onChange={handleChange}
-//                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
-//                   placeholder="Enter your name"
-//                 />
+//                 <label className="block text-sm font-medium text-gray-700">Name</label>
+//                 <input name="name" value={formData.name || ""} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors" placeholder="Enter your name" />
 //               </div>
 
 //               {/* Username */}
 //               <div className="space-y-2">
-//                 <label className="block text-sm font-medium text-gray-700">
-//                   Username
-//                 </label>
-//                 <input
-//                   name="username"
-//                   value={formData.username || ""}
-//                   onChange={handleChange}
-//                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
-//                   placeholder="Enter your username"
-//                 />
+//                 <label className="block text-sm font-medium text-gray-700">Username</label>
+//                 <input name="username" value={formData.username || ""} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors" placeholder="Enter your username" />
 //               </div>
 
 //               {/* Bio */}
 //               <div className="md:col-span-2 space-y-2">
-//                 <label className="block text-sm font-medium text-gray-700">
-//                   Bio
-//                 </label>
-//                 <input
-//                   name="bio"
-//                   value={formData.bio || ""}
-//                   onChange={handleChange}
-//                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
-//                   placeholder="A short bio about yourself"
-//                 />
+//                 <label className="block text-sm font-medium text-gray-700">Bio</label>
+//                 <input name="bio" value={formData.bio || ""} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors" placeholder="A short bio about yourself" />
 //               </div>
 
 //               {/* Age */}
 //               <div className="space-y-2">
-//                 <label className="block text-sm font-medium text-gray-700">
-//                   Age
-//                 </label>
-//                 <input
-//                   name="age"
-//                   type="number"
-//                   value={formData.age || ""}
-//                   onChange={handleChange}
-//                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
-//                   placeholder="Your age"
-//                 />
+//                 <label className="block text-sm font-medium text-gray-700">Age</label>
+//                 <input name="age" type="number" value={formData.age || ""} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors" placeholder="Your age" />
 //               </div>
 
 //               {/* Gender */}
 //               <div className="space-y-2">
-//                 <label className="block text-sm font-medium text-gray-700">
-//                   Gender
-//                 </label>
-//                 <select
-//                   name="gender"
-//                   value={formData.gender || "Prefer not to say"}
-//                   onChange={handleChange}
-//                   className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
-//                 >
+//                 <label className="block text-sm font-medium text-gray-700">Gender</label>
+//                 <select name="gender" value={formData.gender || "Prefer not to say"} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors">
 //                   <option value="Male">Male</option>
 //                   <option value="Female">Female</option>
 //                   <option value="Other">Other</option>
@@ -259,11 +187,7 @@
 //             </div>
 
 //             <div className="mt-8">
-//               <button
-//                 type="submit"
-//                 disabled={saving}
-//                 className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-//               >
+//               <button type="submit" disabled={saving} className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
 //                 {saving ? "Saving..." : "Save Basic Info"}
 //               </button>
 //             </div>
@@ -276,25 +200,27 @@
 
 // export default ProfilePage;
 
-// pages/ProfilePage.jsx
 import React, { useState, useEffect, useContext } from "react";
+import DashboardLayout from "../../components/layouts/DashboardLayout";
 import ProfilePhotoSelector from "../../components/Inputs/ProfilePhotoSelector";
 import axiosInstance from "../../utils/axiosInstance";
 import API_PATHS from "../../utils/apiPaths";
 import { UserContext } from "../../context/UserContext";
 
+const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
+
 const ProfilePage = () => {
-  const { user, updateUser } = useContext(UserContext); // use global user
+  const { user, updateUser } = useContext(UserContext);
   const [formData, setFormData] = useState({});
   const [saving, setSaving] = useState(false);
 
-  // Normalize photo URLs
-  const normalizePhoto = (photoPath) => {
-    if (!photoPath) return null;
-    return photoPath.startsWith("http") ? photoPath : `http://localhost:8000/${photoPath}`;
+  const normalizePhoto = (profilePhoto) => {
+    if (!profilePhoto) return null;
+    if (profilePhoto.data) return `data:${profilePhoto.contentType};base64,${profilePhoto.data}`;
+    if (profilePhoto.startsWith("http")) return profilePhoto;
+    return `${BACKEND_URL}/${profilePhoto}`;
   };
 
-  // Map backend gender values
   const transformGenderValue = (backendValue) => {
     const genderMap = {
       male: "Male",
@@ -309,7 +235,6 @@ const ProfilePage = () => {
     return genderMap[backendValue] || "Prefer not to say";
   };
 
-  // Fetch user profile on mount
   useEffect(() => {
     axiosInstance
       .get(API_PATHS.USER.ME)
@@ -320,15 +245,14 @@ const ProfilePage = () => {
           gender: transformGenderValue(userData.gender),
           profilePhoto: normalizePhoto(userData.profilePhoto),
         };
-        updateUser(transformedData); // update global context
-        setFormData((prev) => (Object.keys(prev).length === 0 ? transformedData : prev));
+        updateUser(transformedData);
+        setFormData(transformedData);
       })
       .catch((err) => console.error("Failed to fetch user profile", err));
   }, []);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     if (name.startsWith("contact.")) {
       const field = name.split(".")[1];
       setFormData((prev) => ({ ...prev, contact: { ...prev.contact, [field]: value } }));
@@ -343,23 +267,21 @@ const ProfilePage = () => {
     }
   };
 
-  const handleUpload = async (e) => {
-    const file = e.target.files[0];
+  const handleUpload = async (file) => {
     if (!file) return;
-
     const data = new FormData();
     data.append("profilePhoto", file);
 
     const previewUrl = URL.createObjectURL(file);
-    updateUser({ ...user, profilePhoto: previewUrl }); // preview in sidebar
+    updateUser({ ...user, profilePhoto: previewUrl });
     setFormData((prev) => ({ ...prev, profilePhoto: previewUrl }));
 
     try {
-      const res = await axiosInstance.post("/api/v1/users/me/photo", data, {
+      const res = await axiosInstance.post(API_PATHS.USER.UPLOAD_PHOTO, data, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       const finalUrl = normalizePhoto(res.data.user.profilePhoto);
-      updateUser({ ...user, profilePhoto: finalUrl }); // final photo
+      updateUser({ ...user, profilePhoto: finalUrl });
       setFormData((prev) => ({ ...prev, profilePhoto: finalUrl }));
     } catch (err) {
       console.error("Photo upload failed:", err.response?.data || err.message);
@@ -369,7 +291,7 @@ const ProfilePage = () => {
 
   const handleRemovePhoto = async () => {
     try {
-      const res = await axiosInstance.delete("/api/v1/users/me/photo");
+      const res = await axiosInstance.delete(API_PATHS.USER.REMOVE_PHOTO);
       const updatedUser = { ...res.data.user, profilePhoto: null };
       updateUser(updatedUser);
       setFormData(updatedUser);
@@ -388,9 +310,9 @@ const ProfilePage = () => {
     const submitData = { ...formData, age: formData.age ? Number(formData.age) : undefined, gender: correctedGender };
 
     axiosInstance
-      .put("/api/v1/auth/me", submitData)
+      .put(API_PATHS.USER.UPDATE, submitData)
       .then((res) => {
-        updateUser(res.data); // update global context
+        updateUser(res.data);
         setFormData(res.data);
         alert("Profile updated successfully");
       })
@@ -404,75 +326,71 @@ const ProfilePage = () => {
 
   if (!user) {
     return (
-      <div className="max-w-5xl mx-auto p-6">
+      <DashboardLayout activeMenu="Profile">
         <div className="flex justify-center items-center min-h-64">
           <p className="text-gray-600">Loading profile...</p>
         </div>
-      </div>
+      </DashboardLayout>
     );
   }
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8 text-gray-900">Profile</h1>
+    <DashboardLayout activeMenu="Profile">
+      <div className="max-w-5xl mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-8 text-gray-900">Profile</h1>
+        <div className="bg-white rounded-2xl shadow-sm border p-8 mb-8">
+          <div className="flex flex-col lg:flex-row gap-8">
+            <div className="w-full lg:w-1/3 flex flex-col items-center">
+              <ProfilePhotoSelector
+                photo={formData.profilePhoto}
+                onUpload={handleUpload}
+                onRemove={handleRemovePhoto}
+              />
+            </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border p-8 mb-8">
-        <div className="flex flex-col lg:flex-row gap-8">
-          <div className="w-full lg:w-1/3 flex flex-col items-center">
-            <ProfilePhotoSelector
-              photo={user.profilePhoto}
-              onUpload={handleUpload}
-              onRemove={handleRemovePhoto}
-            />
+            <form onSubmit={handleSubmit} className="w-full lg:w-2/3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Name</label>
+                  <input name="name" value={formData.name || ""} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors" placeholder="Enter your name" />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Username</label>
+                  <input name="username" value={formData.username || ""} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors" placeholder="Enter your username" />
+                </div>
+
+                <div className="md:col-span-2 space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Bio</label>
+                  <input name="bio" value={formData.bio || ""} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors" placeholder="A short bio about yourself" />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Age</label>
+                  <input name="age" type="number" value={formData.age || ""} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors" placeholder="Your age" />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-700">Gender</label>
+                  <select name="gender" value={formData.gender || "Prefer not to say"} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                    <option value="Prefer not to say">Prefer not to say</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="mt-8">
+                <button type="submit" disabled={saving} className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                  {saving ? "Saving..." : "Save Basic Info"}
+                </button>
+              </div>
+            </form>
           </div>
-
-          <form onSubmit={handleSubmit} className="w-full lg:w-2/3">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Name */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Name</label>
-                <input name="name" value={formData.name || ""} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors" placeholder="Enter your name" />
-              </div>
-
-              {/* Username */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Username</label>
-                <input name="username" value={formData.username || ""} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors" placeholder="Enter your username" />
-              </div>
-
-              {/* Bio */}
-              <div className="md:col-span-2 space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Bio</label>
-                <input name="bio" value={formData.bio || ""} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors" placeholder="A short bio about yourself" />
-              </div>
-
-              {/* Age */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Age</label>
-                <input name="age" type="number" value={formData.age || ""} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors" placeholder="Your age" />
-              </div>
-
-              {/* Gender */}
-              <div className="space-y-2">
-                <label className="block text-sm font-medium text-gray-700">Gender</label>
-                <select name="gender" value={formData.gender || "Prefer not to say"} onChange={handleChange} className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors">
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                  <option value="Prefer not to say">Prefer not to say</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="mt-8">
-              <button type="submit" disabled={saving} className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                {saving ? "Saving..." : "Save Basic Info"}
-              </button>
-            </div>
-          </form>
         </div>
       </div>
-    </div>
+    </DashboardLayout>
   );
 };
 
