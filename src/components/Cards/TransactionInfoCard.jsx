@@ -15,13 +15,14 @@ const TransactionInfoCard = ({
   const { prefs } = useContext(UserContext) || {};
   const appCurrency = prefs?.currency || 'THB';
   const appLanguage = prefs?.language || 'en';
+  const isDark = prefs?.theme === 'dark';
 
   const formattedAmount = formatCurrency(Number(amount) || 0, appCurrency, appLanguage);
   const sign = type === 'income' ? '+' : '-';
 
   const getAmountStyles = () => {
-    if (type === 'income') return 'bg-green-100 text-green-600';
-    if (type === 'expense') return 'bg-red-100 text-red-600';
+    if (type === 'income') return isDark ? 'bg-green-800 text-green-400' : 'bg-green-100 text-green-600';
+    if (type === 'expense') return isDark ? 'bg-red-800 text-red-400' : 'bg-red-100 text-red-600';
     return '';
   };
 
@@ -34,22 +35,29 @@ const TransactionInfoCard = ({
   };
 
   return (
-    <div className="group relative flex items-center gap-4 mt-2 bg-white p-4 rounded-lg shadow-md border border-gray-200/50 hover:bg-gray-50 transition-shadow duration-300">
-      <div className="w-12 h-12 flex items-center justify-center text-xl text-gray-700 bg-gray-100 rounded-full drop-shadow-lg">
+    <div className={`group relative flex items-center gap-4 mt-2 p-4 rounded-lg shadow-md border transition-shadow duration-300
+      ${isDark
+        ? 'bg-gray-800 border-gray-700/50 hover:bg-gray-700 text-gray-200'
+        : 'bg-white border-gray-200/50 hover:bg-gray-50 text-gray-900'
+      }`}
+    >
+      <div className={`w-12 h-12 flex items-center justify-center text-xl rounded-full drop-shadow-lg
+        ${isDark ? 'bg-gray-700 text-gray-200' : 'bg-gray-100 text-gray-700'}`}>
         {renderIcon()}
       </div>
 
       <div className="flex-1 flex items-center justify-between">
         <div>
-          <p className="text-sm text-gray-600 font-medium">{title}</p>
-          <p className="text-xs text-gray-400 mt-1">{date}</p>
+          <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-sm font-medium`}>{title}</p>
+          <p className={`${isDark ? 'text-gray-400' : 'text-gray-400'} text-xs mt-1`}>{date}</p>
         </div>
 
         <div className="flex items-center gap-2">
           {!hideDeleteBtn && (
             <button
               type="button"
-              className="text-gray-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
+              className={`hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer
+                ${isDark ? 'text-gray-400' : 'text-gray-400'}`}
               onClick={onDelete}
               title="Delete"
             >

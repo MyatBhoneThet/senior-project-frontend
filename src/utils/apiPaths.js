@@ -1,4 +1,3 @@
-// ✅ Base URL (use env or fallback to localhost for dev)
 export const BASE_URL =
   import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
@@ -17,12 +16,14 @@ export const API_PATHS = {
     GET_DATA: "/api/v1/dashboard",
   },
   USER: {
-    ME: "/api/v1/auth/me", // Get logged-in user profile
-    UPDATE: "/api/v1/auth/me",
-    DELETE_ME: "/api/v1/auth/me",
-    UPLOAD_PHOTO: "/api/v1/auth/me/photo",
-    REMOVE_PHOTO: "/api/v1/auth/me/photo",
-    UPDATE_PREFS: "/api/v1/auth/me/preferences",
+    // FIXED: These should point to /users routes, not /auth routes
+    ME: "/api/v1/users/me", // Get logged-in user profile
+    UPDATE: "/api/v1/users/me",
+    DELETE_ME: "/api/v1/users/me",
+    UPLOAD_PHOTO: "/api/v1/users/me/photo",
+    REMOVE_PHOTO: "/api/v1/users/me/photo",
+    UPDATE_PREFS: "/api/v1/users/me/preferences", // FIXED: was /auth/me/preferences
+    GET_PREFS: "/api/v1/users/me/preferences",    // Added for completeness
   },
   INCOME: {
     ADD_INCOME: "/api/v1/income/add",
@@ -34,7 +35,11 @@ export const API_PATHS = {
     ADD_EXPENSE: "/api/v1/expense/add",
     GET_ALL_EXPENSE: "/api/v1/expense/get",
     DELETE_EXPENSE: (expenseId) => `/api/v1/expense/${expenseId}`,
-    DOWNLOAD_EXCEL: "/api/v1/expense/downloadexpense",
+    DOWNLOAD_EXCEL: "/api/v1/expense/downloadexcel",
+  },
+  CATEGORIES: {
+    LIST: (type) => `/api/v1/categories?type=${type}`, // GET
+    CREATE: "/api/v1/categories", // POST {type,name}
   },
   IMAGE: {
     UPLOAD_IMAGE: "/api/v1/auth/upload-image",

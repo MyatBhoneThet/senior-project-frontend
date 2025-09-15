@@ -15,9 +15,13 @@ export default function ChatWidget() {
     {
       role: 'assistant',
       content:
-        "Hi! I’m Smart Spend. Ask things like:\n• How much did I spend on rent?\n• How much did I get from salary?\nOr use the Quick Ask tabs above.",
+        "Hi! I’m Smart Spend. Ask things like:\n• How much did I spend on rent?\n• How much did I get from salary?\nOr use the tabs above to see totals.",
     },
   ]);
+
+  // Range + last clicked tab
+  const [range, setRange] = useState('30d'); // '30d' | '2m'
+  const [lastKind, setLastKind] = useState(null); // 'expenses' | 'incomes' | 'insights' | null
 
   const listRef = useRef(null);
 
@@ -25,6 +29,35 @@ export default function ChatWidget() {
     listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: 'smooth' });
   }, [messages, open]);
 
+  // ---- Helpers --------------------------------------------------------------
+  const rangePretty = (k) => (k === '2m' ? 'Last 2 months' : 'Last 30 days');
+
+  function formatTHB(n) {
+    return new Intl.NumberFormat('th-TH', {
+      style: 'currency',
+      currency: 'THB',
+      maximumFractionDigits: 2,
+    }).format(Number(n || 0));
+  }
+
+  const toISODate = (d) => d.toISOString().slice(0, 10);
+
+  function getDates(k) {
+    const now = new Date();
+    const endDate = toISODate(now);
+
+    const start = new Date(now);
+    if (k === '2m') {
+      const day = start.getDate();
+      start.setMonth(start.getMonth() - 2);
+      if (start.getDate() !== day) start.setDate(1); // handle short months
+    } else {
+      start.setDate(start.getDate() - 29); // last 30 days inclusive
+    }
+    return { startDate: toISODate(start), endDate };
+  }
+
+  // ---- Chat route for free-text --------------------------------------------
   async function handleSend(forcedText) {
     const userText = (forcedText ?? text).trim();
     if (!userText) return;
@@ -35,7 +68,11 @@ export default function ChatWidget() {
     setLoading(true);
 
     try {
-      const { data } = await axiosInstance.post(API_PATHS.CHAT.SEND, { messages: next }, { timeout: 20000 });
+      const { data } = await axiosInstance.post(
+        API_PATHS.CHAT.SEND,
+        { messages: next },
+        { timeout: 20000 }
+      );
       const reply = data?.reply?.content || 'Sorry, no reply.';
       setMessages((cur) => [...cur, { role: 'assistant', content: reply }]);
     } catch (err) {
@@ -55,13 +92,87 @@ export default function ChatWidget() {
     handleSend();
   }
 
-  function quickAsk(kind) {
-    // Sends the simple triggers your backend understands:
-    // 'expenses', 'incomes', 'insights' (last 30 days)
-    const phrase = kind === 'expenses' ? 'expenses' : kind === 'incomes' ? 'incomes' : 'insights';
-    if (!open) setOpen(true);
-    handleSend(phrase);
+  // ---- NEW: direct totals for tabs (uses ?type=income|expense) -------------
+  async function fetchTotal(kind, kRange) {
+    const { startDate, endDate } = getDates(kRange);
+
+    try {
+      setLoading(true);
+
+      if (kind === 'insights') {
+        // call twice and compute net
+        const [incRes, expRes] = await Promise.all([
+          axiosInstance.get(API_PATHS.TRANSACTIONS.ANALYTICS_SUM, {
+            params: { type: 'income', startDate, endDate },
+          }),
+          axiosInstance.get(API_PATHS.TRANSACTIONS.ANALYTICS_SUM, {
+            params: { type: 'expense', startDate, endDate },
+          }),
+        ]);
+
+        const income = incRes?.data?.total ?? incRes?.data?.sum ?? incRes?.data?.amount ?? 0;
+        const expense = expRes?.data?.total ?? expRes?.data?.sum ?? expRes?.data?.amount ?? 0;
+        const net = income - expense;
+
+        const lines = [
+          `${rangePretty(kRange)} • Insights`,
+          `• Incomes:  ${formatTHB(income)}`,
+          `• Expenses: ${formatTHB(expense)}`,
+          `• Net:      ${formatTHB(net)}`,
+        ].join('\n');
+
+        setMessages((cur) => [
+          ...cur,
+          { role: 'user', content: `${kind} — ${rangePretty(kRange)}` },
+          { role: 'assistant', content: lines },
+        ]);
+        return;
+      }
+
+      const typeParam = kind === 'expenses' ? 'expense' : 'income';
+      const res = await axiosInstance.get(API_PATHS.TRANSACTIONS.ANALYTICS_SUM, {
+        params: { type: typeParam, startDate, endDate },
+      });
+      const total = res?.data?.total ?? res?.data?.sum ?? res?.data?.amount ?? 0;
+
+      const title =
+        kind === 'expenses'
+          ? `${rangePretty(kRange)} • Expenses`
+          : `${rangePretty(kRange)} • Incomes`;
+
+      const line = `${title} = ${formatTHB(total)}`;
+
+      setMessages((cur) => [
+        ...cur,
+        { role: 'user', content: `${kind} — ${rangePretty(kRange)}` },
+        { role: 'assistant', content: line },
+      ]);
+    } catch (e) {
+      // Show a friendly error and stop spamming the raw backend text.
+      setMessages((cur) => [
+        ...cur,
+        {
+          role: 'assistant',
+          content:
+            'Unable to fetch totals. Make sure your endpoint /transactions/analytics/sum accepts ?type=income|expense and ?startDate=YYYY-MM-DD&endDate=YYYY-MM-DD.',
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   }
+
+  function quickAsk(kind) {
+    setLastKind(kind);
+    if (!open) setOpen(true);
+    fetchTotal(kind, range);
+  }
+
+  // If user flips the range and a tab was selected before, refetch automatically
+  useEffect(() => {
+    if (lastKind) fetchTotal(lastKind, range);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [range]);
 
   return (
     <>
@@ -91,7 +202,35 @@ export default function ChatWidget() {
             </button>
           </div>
 
-          {/* Quick Ask tabs now INSIDE the chatbot */}
+          {/* Range selector */}
+          <div className="px-3 pt-2">
+            <div className="flex items-center gap-2 text-sm">
+              <button
+                onClick={() => setRange('30d')}
+                className={`px-3 py-1 rounded-lg border ${
+                  range === '30d' ? 'bg-black/5' : 'bg-white hover:bg-gray-50'
+                }`}
+                aria-pressed={range === '30d'}
+              >
+                Last 30 days
+              </button>
+              <button
+                onClick={() => setRange('2m')}
+                className={`px-3 py-1 rounded-lg border ${
+                  range === '2m' ? 'bg-black/5' : 'bg-white hover:bg-gray-50'
+                }`}
+                aria-pressed={range === '2m'}
+              >
+                Last 2 months
+              </button>
+
+              <div className="ml-auto text-[11px] text-gray-500 select-none">
+                Range: {rangePretty(range)}
+              </div>
+            </div>
+          </div>
+
+          {/* Tabs */}
           <div className="px-3 pt-2 border-b">
             <div className="flex items-center gap-2 text-sm">
               <button
@@ -114,7 +253,7 @@ export default function ChatWidget() {
               </button>
             </div>
             <p className="text-[11px] text-gray-500 my-1">
-              Try: “how much did I spend on rent” or “how much did I get from salary”.
+              Click a tab to show totals for the selected range.
             </p>
           </div>
 
@@ -133,10 +272,10 @@ export default function ChatWidget() {
                 )}
               </div>
             ))}
-            {loading && <div className="text-xs text-gray-500">Smart Spend is typing…</div>}
+            {loading && <div className="text-xs text-gray-500">Working…</div>}
           </div>
 
-          {/* Input */}
+          {/* Input -> still uses your chat route */}
           <form onSubmit={onSubmit} className="p-3 border-t flex gap-2">
             <input
               value={text}

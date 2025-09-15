@@ -4,7 +4,13 @@ import TransactionInfoCard from '../Cards/TransactionInfoCard';
 import moment from 'moment';
 import useT from '../../hooks/useT';
 
-const IncomeList = ({ transactions, onDelete, onDownload }) => {
+function titleFrom(tx) {
+  const category = tx.categoryName || tx.category || 'Uncategorized';
+  const src = (tx.source || '').trim();
+  return src ? `${src} (${category})` : category;                   // 👉 "Salary (Salary)"
+}
+
+const IncomeList = ({ transactions = [], onDelete, onDownload }) => {
   const { t, lang } = useT();
 
   // Optional: localize Moment month/day names to match app language
@@ -20,6 +26,7 @@ const IncomeList = ({ transactions, onDelete, onDownload }) => {
   const tt = (key, fallback) => {
     const s = t(key);
     return s && s !== key ? s : fallback;
+    // If you don't use i18n, just return fallback.
   };
 
   return (
@@ -35,17 +42,21 @@ const IncomeList = ({ transactions, onDelete, onDownload }) => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2">
-        {transactions?.map((income) => (
+        {transactions.map((income) => (
           <TransactionInfoCard
             key={income._id}
-            title={income.source}
+            title={titleFrom(income)}                                  // 👉 "Freelance (Business)"
             icon={income.icon}
-            date={moment(income.date).format('Do MMM YYYY')}
-            amount={income.amount}      // keep raw number; card formats using prefs
+            date={income.date ? moment(income.date).format('Do MMM YYYY') : ''}
+            amount={income.amount}                                     // card handles sign/format
             type="income"
-            onDelete={() => onDelete(income._id)}
+            onDelete={() => onDelete?.(income._id)}
           />
         ))}
+
+        {transactions.length === 0 && (
+          <div className="text-slate-500 text-sm py-3">No income yet.</div>
+        )}
       </div>
     </div>
   );

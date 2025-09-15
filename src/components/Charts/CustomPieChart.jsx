@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react';
 import {
   PieChart,
   Pie,
@@ -8,84 +8,58 @@ import {
   Tooltip,
   Label
 } from 'recharts';
-
 import CustomTooltip from './CustomTooltip';
 import CustomLegend from './CustomLegend';
+import { UserContext } from '../../context/UserContext';
 
-const CustomPieChart = ({
-  data,
-  label,
-  colors,
-  totalAmount,
-}) => {
-  // Track whether the document is in dark mode (Tailwind uses .dark on <html>)
-  const [isDark, setIsDark] = useState(
-    typeof document !== 'undefined' &&
-      document.documentElement.classList.contains('dark')
-  );
+const CustomPieChart = ({ data, label, colors, totalAmount }) => {
+  const { prefs } = useContext(UserContext);
+  const isDark = prefs?.theme === 'dark';
 
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
+  // Center label colors
+  const centerLabelColor = isDark ? '#9CA3AF' : '#6B7280'; // gray-400 / gray-500
+  const centerValueColor = isDark ? '#FFFFFF' : '#111827'; // white / slate-900
 
-    const el = document.documentElement;
-    const update = () => setIsDark(el.classList.contains('dark'));
+  // Background container color
+  const containerBg = isDark ? 'bg-gray-900' : 'bg-white';
 
-    // Observe class changes on <html> so we react to theme toggles
-    const observer = new MutationObserver(update);
-    observer.observe(el, { attributes: true, attributeFilter: ['class'] });
-
-    // In case something toggled before observer attached
-    update();
-
-    return () => observer.disconnect();
-  }, []);
-
-  // Choose colors based on theme
-  // (Tailwind-ish equivalents: label ~ text-gray-500 / gray-400, value ~ slate-900 / white)
-  const centerLabelColor = isDark ? '#9CA3AF' : '#6B7280';  // gray-400 / gray-500
-  const centerValueColor = isDark ? '#FFFFFF' : '#111827';  // white / slate-900
+  // Adjust tooltip and legend for dark theme
+  const tooltipBg = isDark ? 'bg-gray-800 text-gray-200 border-gray-600' : 'bg-white text-gray-900 border-gray-300';
 
   return (
-    <ResponsiveContainer width="100%" height={300}>
-      <PieChart>
-        <Pie
-          data={data}
-          dataKey="amount"
-          nameKey="name"
-          cx="50%"
-          cy="50%"
-          outerRadius={130}
-          innerRadius={100}
-          labelLine={false}
-        >
-          {data.map((entry, index) => (
-            <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-          ))}
+    <div className={`${containerBg} p-2 rounded-lg`}>
+      <ResponsiveContainer width="100%" height={300}>
+        <PieChart>
+          <Pie
+            data={data}
+            dataKey="amount"
+            nameKey="name"
+            cx="50%"
+            cy="50%"
+            outerRadius={130}
+            innerRadius={100}
+            labelLine={false}
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+            ))}
 
-          {/* Center label (small) */}
-          <Label
-            value={label}
-            position="center"
-            fill={centerLabelColor}
-            fontSize={14}
-            dy={-20}
+            {/* Center label */}
+            <Label value={label} position="center" fill={centerLabelColor} fontSize={14} dy={-20} />
+            <Label value={totalAmount} position="center" fill={centerValueColor} fontSize={24} fontWeight={600} dy={10} />
+          </Pie>
+
+          <Tooltip
+            content={(props) => (
+              <div className={`shadow-md rounded-lg p-2 border ${tooltipBg}`}>
+                <CustomTooltip {...props} />
+              </div>
+            )}
           />
-
-          {/* Center value (large) */}
-          <Label
-            value={totalAmount}
-            position="center"
-            fill={centerValueColor}
-            fontSize={24}
-            fontWeight={600}
-            dy={10}
-          />
-        </Pie>
-
-        <Tooltip content={<CustomTooltip />} />
-        <Legend content={<CustomLegend />} />
-      </PieChart>
-    </ResponsiveContainer>
+          <Legend content={(props) => <CustomLegend {...props} />} />
+        </PieChart>
+      </ResponsiveContainer>
+    </div>
   );
 };
 

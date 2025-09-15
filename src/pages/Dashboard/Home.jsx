@@ -29,10 +29,11 @@ const Home = () => {
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // get prefs from context (currency/language)
+  // get prefs from context (currency/language/theme)
   const { prefs } = useContext(UserContext) || {};
   const appCurrency = prefs?.currency || 'THB';
   const appLanguage = prefs?.language || 'en';
+  const appTheme = prefs?.theme || 'light'; // <<--- add theme here
 
   const fetchDashboardData = async () => {
     if (loading) return;
@@ -54,7 +55,9 @@ const Home = () => {
 
   return (
     <DashboardLayout activeMenu="Dashboard">
-      <div className="my-5 mx-auto">
+      {/* Theme wrapper */}
+      <div className={`${appTheme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'} min-h-screen my-5 mx-auto`}>
+        
         {/* Top summary cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <InfoCard
@@ -98,7 +101,6 @@ const Home = () => {
             onSeeMore={() => navigate('/expense')}
           />
 
-          {/* NOTE: If Last30DaysExpenses expects prop name `data`, change `date` to `data` below */}
           <Last30DaysExpenses
             date={dashboardData?.last30DaysExpenses?.transactions || []}
           />

@@ -1,57 +1,72 @@
 import React, { useState } from 'react';
 import Input from '../Inputs/Input';
 import EmojiPickerPopup from '../layouts/EmojiPickerPopup';
+import CategorySelect from '../common/CategorySelect';
 
 const AddExpenseForm = ({ onAddExpense }) => {
-    const[income, setIncome ]= useState({
-        category: '',
-        amount: '',
-        date: '',
-        icon: '',
-    });
+  const [expense, setExpense] = useState({
+    source: '',
+    categoryId: '',
+    categoryName: 'Uncategorized',
+    amount: '',
+    date: '',
+    icon: '',
+  });
 
-    const handleChange = (key, value) => setIncome({...income, [key]: value});
+  const setField = (k, v) => setExpense((p) => ({ ...p, [k]: v }));
 
-    return <div>
-        <EmojiPickerPopup
-            icon = {income.icon}
-            onSelect = {(selectedIcon) => handleChange('icon', selectedIcon)}
+  return (
+    <div>
+      <EmojiPickerPopup icon={expense.icon} onSelect={(e) => setField('icon', e)} />
+
+      <Input
+        value={expense.source}
+        onChange={({ target }) => setField('source', target.value)}
+        label="Expense Source"
+        placeholder="KFC, Starbucks, Grab…"
+        type="text"
+      />
+
+      <div className="mt-3">
+        <label className="block mb-1 text-sm">Category</label>
+        <CategorySelect
+          type="expense"
+          value={expense.categoryId}
+          onChange={(id, name) => {
+            setField('categoryId', id);
+            setField('categoryName', name || 'Uncategorized');
+          }}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
+        <Input
+          value={expense.amount}
+          onChange={({ target }) => setField('amount', target.value)}
+          label="Amount"
+          placeholder="0.00"
+          type="number"
         />
         <Input
-            value = {income.category}
-            onChange = {({target}) => handleChange('category', target.value)}
-            label = "Category"
-            placeholder = "Food, Entertainment, etc."
-            type = "text"
+          value={expense.date}
+          onChange={({ target }) => setField('date', target.value)}
+          label="Date"
+          placeholder="YYYY-MM-DD"
+          type="date"
         />
+      </div>
 
-        <Input
-            value = {income.amount}
-            onChange = {({target}) => handleChange('amount', target.value)}
-            label = "Amount"
-            placeholder = ""
-            type = "number"
-        />
-
-        <Input
-            value = {income.date}
-            onChange = {({target}) => handleChange('date', target.value)}
-            label = "Date"
-            placeholder = "YYYY-MM-DD"
-            type = "date"
-        />
-
-        <div className='flex justify-end mt-6'>
-            <button
-                type="button"
-                className='add-btn add-btn-fill'
-                onClick={() => onAddExpense(income)}
-            >
-                Add Expense
-            </button>
-        </div>
-    </div>;
-
+      <div className="flex justify-end mt-6">
+        <button
+          type="button"
+          className="add-btn add-btn-fill"
+          onClick={() => onAddExpense?.({ ...expense, amount: Number(expense.amount) })}
+        >
+          Add Expense
+        </button>
+      </div>
+    </div>
+  );
 };
 
 export default AddExpenseForm;
