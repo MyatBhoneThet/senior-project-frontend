@@ -26,31 +26,39 @@ export default function RecurringForm({ initial, onSaved, onCancel }) {
 
   const toISODate = (v) => (v ? String(v).slice(0,10) : undefined);
 
-  async function handleSubmit(e) {
-    e.preventDefault();
-    setSaving(true);
-    try {
-      const { timezone, ...rest } = form;
-      const payload = {
-        ...rest,
-        amount: Number(rest.amount || 0),
-        dayOfMonth: Number(rest.dayOfMonth || 1),
-        startDate: toISODate(rest.startDate),
-        endDate: toISODate(rest.endDate),
-      };
+async function handleSubmit(e) {
+  e.preventDefault();
+  setSaving(true);
+  try {
+    const body = {
+      type: form.type,
+      category: form.category,
+      source: form.source || '',
+      amount: Number(form.amount),
+      dayOfMonth: Number(form.dayOfMonth || 1),
+      startDate: form.startDate,
+      endDate: form.endDate || undefined,
+      isActive: !!form.isActive,
+      notes: form.notes || '',
+    };
 
-      if (initial?._id) {
-        await axiosInstance.patch(`${API_PATHS.RECURRING.BASE}/${initial._id}`, payload);
-      } else {
-        await axiosInstance.post(API_PATHS.RECURRING.BASE, payload);
-      }
-      onSaved?.();
-    } catch (e) {
-      alert(e.response?.data?.message || e.message);
-    } finally {
-      setSaving(false);
+    if (initial?._id) {
+      await axiosInstance.patch(`${API_PATHS.RECURRING.BASE}/${initial._id}`, body);
+    } else {
+      await axiosInstance.post(API_PATHS.RECURRING.BASE, body);
     }
+
+    // ✅ force backfill so Income/Expense pages show it immediately
+    await axiosInstance.post(`${API_PATHS.RECURRING.BASE}/run`);
+
+    onSaved?.();
+  } catch (e) {
+    alert(e.response?.data?.message || e.message);
+  } finally {
+    setSaving(false);
   }
+}
+
 
   // Common input classes
   const inputClass = `input ${isDark 

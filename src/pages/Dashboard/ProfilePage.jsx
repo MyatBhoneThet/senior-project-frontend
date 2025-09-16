@@ -103,36 +103,47 @@ const ProfilePage = () => {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
-    setSaving(true);
+  e.preventDefault();
+  setSaving(true);
 
-    const correctedGender = transformGenderValue(formData.gender);
-    const submitData = { ...formData, age: formData.age ? Number(formData.age) : undefined, gender: correctedGender };
+  try {
+    // Exclude profilePhoto from update payload
+    const { profilePhoto, ...rest } = formData;
+
+    // Ensure gender and age are correct types
+    const correctedGender = transformGenderValue(rest.gender);
+    const submitData = {
+      ...rest,
+      age: rest.age ? Number(rest.age) : undefined,
+      gender: correctedGender,
+    };
 
     axiosInstance
       .put(API_PATHS.USER.UPDATE, submitData)
       .then((res) => {
-        updateUser(res.data);
-        setFormData(res.data);
+        // Keep existing profilePhoto in frontend state
+        const updatedUser = { ...res.data, profilePhoto: formData.profilePhoto };
+        updateUser(updatedUser);
+        setFormData(updatedUser);
         alert("Profile updated successfully");
       })
       .catch((err) => {
         console.error("Update error:", err);
-        const errorMessage = err.response?.data?.message || err.response?.data?.error || err.message || "Failed to save profile";
+        const errorMessage =
+          err.response?.data?.message ||
+          err.response?.data?.error ||
+          err.message ||
+          "Failed to save profile";
         alert(`Error: ${errorMessage}`);
       })
       .finally(() => setSaving(false));
-  };
-
-  if (!user) {
-    return (
-      <DashboardLayout activeMenu="Profile">
-        <div className="flex justify-center items-center min-h-64">
-          <p className={isDarkTheme ? "text-gray-300" : "text-gray-600"}>Loading profile...</p>
-        </div>
-      </DashboardLayout>
-    );
+  } catch (err) {
+    console.error("Unexpected error:", err);
+    alert("Something went wrong while saving your profile.");
+    setSaving(false);
   }
+};
+
 
   // Dark/light theme classes
   const containerClass = isDarkTheme ? "min-h-screen bg-gray-900 text-gray-100" : "min-h-screen bg-gray-50 text-gray-900";

@@ -30,6 +30,7 @@ export default function RecurringList() {
   async function toggle(id, isActive) {
     try {
       await axiosInstance.patch(`${API_PATHS.RECURRING.BASE}/${id}/toggle`, { isActive });
+      await axiosInstance.post(`${API_PATHS.RECURRING.BASE}/run`);
       await load();
     } catch {
       alert('Failed to toggle');
@@ -40,6 +41,7 @@ export default function RecurringList() {
     if (!confirm('Delete this rule?')) return;
     try {
       await axiosInstance.delete(`${API_PATHS.RECURRING.BASE}/${id}`);
+      await axiosInstance.post(`${API_PATHS.RECURRING.BASE}/run`);
       await load();
     } catch {
       alert('Failed to delete');

@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import { useUserAuth } from '../../hooks/useUserAuth';
+// src/pages/Dashboard/Expense.jsx
+import React, { useEffect, useRef, useState } from 'react';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
-import axiosInstance from '../../utils/axiosInstance';
-import { API_PATHS } from '../../utils/apiPaths';
+import ExpenseOverview from '../../components/Expense/ExpenseOverview';
+import ExpenseList from '../../components/Expense/ExpenseList';
 import Modal from '../../components/layouts/Modal';
 import AddExpenseForm from '../../components/Expense/AddExpenseForm';
-import { toast } from 'react-toastify';
-import ExpenseList from '../../components/Expense/ExpenseList';
 import DeleteAlert from '../../components/layouts/DeleteAlert';
-import ExpenseOverview from '../../components/Expense/ExpenseOverview';
+import axiosInstance from '../../utils/axiosInstance';
+import { API_PATHS } from '../../utils/apiPaths';
+import { toast } from 'react-toastify';
+import { useUserAuth } from '../../hooks/useUserAuth';
+import { syncRecurring } from '../../utils/syncRecurring'; // ← use the shared helper
 
 const Expense = () => {
   useUserAuth();
@@ -17,18 +19,22 @@ const Expense = () => {
   const [loading, setLoading] = useState(false);
   const [openDeleteAlert, setOpenDeleteAlert] = useState({ show: false, data: null });
   const [openAddExpenseModal, setOpenAddExpenseModal] = useState(false);
+  const mounted = useRef(true);
 
   const fetchExpenseDetails = async () => {
     if (loading) return;
     setLoading(true);
     try {
+      // Ensure recurring rules are materialized before reading expenses
+      await syncRecurring({ silent: true });
       const { data } = await axiosInstance.get(API_PATHS.EXPENSE.GET_ALL_EXPENSE);
+      if (!mounted.current) return;
       setExpenseData(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error(error);
       toast.error('Something went wrong. Please try again.');
     } finally {
-      setLoading(false);
+      if (mounted.current) setLoading(false);
     }
   };
 
@@ -40,13 +46,16 @@ const Expense = () => {
 
     try {
       await axiosInstance.post(API_PATHS.EXPENSE.ADD_EXPENSE, {
-        source,
-        amount,
-        date,
-        icon,
+        source: (source || '').trim(),
         categoryId: categoryId || undefined,
-        category: categoryName || 'Uncategorized',
+        category: categoryName || undefined,
+        amount: Number(amount),
+        date,
+        icon: icon || '',
       });
+
+      // Show how many items got created by recurring sync (if any)
+      await syncRecurring({ silent: false });
       setOpenAddExpenseModal(false);
       toast.success('Expense added successfully.');
       fetchExpenseDetails();
@@ -59,6 +68,7 @@ const Expense = () => {
   const deleteExpense = async (id) => {
     try {
       await axiosInstance.delete(API_PATHS.EXPENSE.DELETE_EXPENSE(id));
+      await syncRecurring({ silent: false });
       setOpenDeleteAlert({ show: false, data: null });
       toast.success('Expense deleted successfully.');
       fetchExpenseDetails();
@@ -70,14 +80,14 @@ const Expense = () => {
 
   const handleDownloadExpenseDetails = async () => {
     try {
-      const response = await axiosInstance.get(API_PATHS.EXPENSE.DOWNLOAD_EXPENSE, { responseType: 'blob' });
+      const response = await axiosInstance.get(API_PATHS.EXPENSE.DOWNLOAD_EXCEL, { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', 'expense_details.xlsx');
       document.body.appendChild(link);
       link.click();
-      link.parentNode.removeChild(link);
+      link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error(error);
@@ -85,7 +95,12 @@ const Expense = () => {
     }
   };
 
-  useEffect(() => { fetchExpenseDetails(); }, []);
+  useEffect(() => {
+    mounted.current = true;
+    fetchExpenseDetails();
+    return () => { mounted.current = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <DashboardLayout activeMenu="Expense">
@@ -94,8 +109,8 @@ const Expense = () => {
           <ExpenseOverview
             transactions={expenseData}
             onAddExpense={() => setOpenAddExpenseModal(true)}
-            onExpenseIncome={() => setOpenAddExpenseModal(true)} // in case your component expects this name
           />
+
           <ExpenseList
             transactions={expenseData}
             onDelete={(id) => setOpenDeleteAlert({ show: true, data: id })}
@@ -107,8 +122,15 @@ const Expense = () => {
           <AddExpenseForm onAddExpense={handleAddExpense} />
         </Modal>
 
-        <Modal isOpen={openDeleteAlert.show} onClose={() => setOpenDeleteAlert({ show: false, data: null })} title="Delete Expense">
-          <DeleteAlert content="Are you sure you want to delete this expense?" onDelete={() => deleteExpense(openDeleteAlert.data)} />
+        <Modal
+          isOpen={openDeleteAlert.show}
+          onClose={() => setOpenDeleteAlert({ show: false, data: null })}
+          title="Delete Expense"
+        >
+          <DeleteAlert
+            content="Are you sure you want to delete this expense?"
+            onDelete={() => deleteExpense(openDeleteAlert.data)}
+          />
         </Modal>
       </div>
     </DashboardLayout>

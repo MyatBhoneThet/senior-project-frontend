@@ -82,10 +82,10 @@ export default function SideMenu() {
     return item.label ?? "Recurring";
   };
 
-  // ✅ Use backend URL if profilePhoto exists
+  // Use backend URL if profilePhoto exists
   const photoUrl = user?.profilePhoto
-  ? `${BACKEND_URL}/api/v1/users/photo/${user._id}`
-  : null;
+    ? `${BACKEND_URL}/api/v1/users/photo/${user._id}`
+    : null;
 
   return (
     <div className={containerClass}>
@@ -104,14 +104,15 @@ export default function SideMenu() {
             style="text-xl"
           />
         )}
-        <h5 className={userNameClass}>{user?.fullName || ""}</h5>
+        {/* Show username if available, else fullName */}
+        <h5 className={userNameClass}>{user?.username || user?.fullName || ""}</h5>
       </div>
 
       {menuItems.map((item, idx) => {
         const labelText = getLabel(item);
         const Icon = item.icon;
 
-        if (item.path === "logout") {
+        if (item.path === "/logout") {
           return (
             <button
               key={`menu_${idx}`}

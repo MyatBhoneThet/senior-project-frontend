@@ -1,14 +1,16 @@
-import React, { useEffect, useState } from 'react';
+// src/pages/Dashboard/Income.jsx
+import React, { useEffect, useRef, useState } from 'react';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
 import IncomeOverview from '../../components/Income/IncomeOverview';
-import axiosInstance from '../../utils/axiosInstance';
-import { API_PATHS } from '../../utils/apiPaths';
+import IncomeList from '../../components/Income/IncomeList';
 import Modal from '../../components/layouts/Modal';
 import AddIncomeForm from '../../components/Income/AddIncomeForm';
-import { toast } from 'react-toastify';
-import IncomeList from '../../components/Income/IncomeList';
 import DeleteAlert from '../../components/layouts/DeleteAlert';
+import axiosInstance from '../../utils/axiosInstance';
+import { API_PATHS } from '../../utils/apiPaths';
+import { toast } from 'react-toastify';
 import { useUserAuth } from '../../hooks/useUserAuth';
+import { syncRecurring } from '../../utils/syncRecurring'; // ← shared helper
 
 const Income = () => {
   useUserAuth();
@@ -17,18 +19,22 @@ const Income = () => {
   const [loading, setLoading] = useState(false);
   const [openDeleteAlert, setOpenDeleteAlert] = useState({ show: false, data: null });
   const [openAddIncomeModal, setOpenAddIncomeModal] = useState(false);
+  const mounted = useRef(true);
 
   const fetchIncomeDetails = async () => {
     if (loading) return;
     setLoading(true);
     try {
+      // Ensure recurring rules are materialized before reading incomes
+      await syncRecurring({ silent: true });
       const { data } = await axiosInstance.get(API_PATHS.INCOME.GET_ALL_INCOME);
+      if (!mounted.current) return;
       setIncomeData(Array.isArray(data) ? data : []);
     } catch (error) {
       console.error(error);
       toast.error('Something went wrong. Please try again.');
     } finally {
-      setLoading(false);
+      if (mounted.current) setLoading(false);
     }
   };
 
@@ -41,13 +47,16 @@ const Income = () => {
 
     try {
       await axiosInstance.post(API_PATHS.INCOME.ADD_INCOME, {
-        source,
-        amount,
-        date,
-        icon,
+        source: source.trim(),
         categoryId: categoryId || undefined,
-        category: categoryName || 'Uncategorized',
+        category: categoryName || undefined,
+        amount: Number(amount),
+        date,
+        icon: icon || '',
       });
+
+      // Show how many items got created by recurring sync (if any)
+      await syncRecurring({ silent: false });
       setOpenAddIncomeModal(false);
       toast.success('Income added successfully.');
       fetchIncomeDetails();
@@ -60,6 +69,7 @@ const Income = () => {
   const deleteIncome = async (id) => {
     try {
       await axiosInstance.delete(API_PATHS.INCOME.DELETE_INCOME(id));
+      await syncRecurring({ silent: false });
       setOpenDeleteAlert({ show: false, data: null });
       toast.success('Income deleted successfully.');
       fetchIncomeDetails();
@@ -71,14 +81,14 @@ const Income = () => {
 
   const handleDownloadIncomeDetails = async () => {
     try {
-      const response = await axiosInstance.get(API_PATHS.INCOME.DOWNLOAD_INCOME, { responseType: 'blob' });
+      const response = await axiosInstance.get(API_PATHS.INCOME.DOWNLOAD_EXCEL, { responseType: 'blob' });
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;
       link.setAttribute('download', 'income_details.xlsx');
       document.body.appendChild(link);
       link.click();
-      link.parentNode.removeChild(link);
+      link.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error(error);
@@ -86,7 +96,12 @@ const Income = () => {
     }
   };
 
-  useEffect(() => { fetchIncomeDetails(); }, []);
+  useEffect(() => {
+    mounted.current = true;
+    fetchIncomeDetails();
+    return () => { mounted.current = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <DashboardLayout activeMenu="Income">
@@ -96,6 +111,7 @@ const Income = () => {
             transactions={incomeData}
             onAddIncome={() => setOpenAddIncomeModal(true)}
           />
+
           <IncomeList
             transactions={incomeData}
             onDelete={(id) => setOpenDeleteAlert({ show: true, data: id })}
@@ -107,8 +123,15 @@ const Income = () => {
           <AddIncomeForm onAddIncome={handleAddIncome} />
         </Modal>
 
-        <Modal isOpen={openDeleteAlert.show} onClose={() => setOpenDeleteAlert({ show: false, data: null })} title="Delete Income">
-          <DeleteAlert content="Are you sure you want to delete this income?" onDelete={() => deleteIncome(openDeleteAlert.data)} />
+        <Modal
+          isOpen={openDeleteAlert.show}
+          onClose={() => setOpenDeleteAlert({ show: false, data: null })}
+          title="Delete Income"
+        >
+          <DeleteAlert
+            content="Are you sure you want to delete this income?"
+            onDelete={() => deleteIncome(openDeleteAlert.data)}
+          />
         </Modal>
       </div>
     </DashboardLayout>
