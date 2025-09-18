@@ -59,10 +59,9 @@ async function handleSubmit(e) {
   }
 }
 
-
   // Common input classes
   const inputClass = `input ${isDark 
-    ? 'bg-gray-700 text-gray-200 placeholder-gray-400 border-gray-600 focus:ring-2 focus:ring-purple-500' 
+    ? 'bg-gray-700 text-gray-700 placeholder-gray-700 border-gray-600 focus:ring-2 focus:ring-purple-500' 
     : ''}`;
 
   // Buttons

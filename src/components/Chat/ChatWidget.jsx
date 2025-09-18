@@ -171,15 +171,24 @@ export default function ChatWidget() {
 
   return (
     <>
-      {/* Floating toggle button */}
-      <button
-        className={`fixed bottom-6 ${btnPos} z-40 w-12 h-12 rounded-full shadow-lg 
-          ${isDark ? 'bg-gray-700 text-gray-200' : 'bg-primary text-white'} grid place-items-center`}
+<div className={`fixed bottom-6 ${btnPos} z-40 flex items-center gap-2`}>
+  {/* Circle button */}
+  <button
+    className={`w-14 h-14 rounded-full shadow-lg grid place-items-center 
+        ${isDark ? 'bg-purple-600 text-gray-200' : 'bg-gradient-to-r from-orange-500 to-pink-500 text-white'}`}
         onClick={() => setOpen((v) => !v)}
         aria-label="Toggle chat"
-      >
-        {open ? <LuX /> : <LuMessageCircle />}
-      </button>
+        >
+    {open ? <LuX size={26} /> : <LuMessageCircle size={28} />}
+    {/* Label */}
+  </button>
+        <div
+          className={`px-3 py-2 rounded-full shadow-md text-sm font-medium flex items-center gap-1
+            ${isDark ? 'bg-gray-700 text-gray-100' : 'bg-white text-gray-900'}`}
+        >
+          <span>Chat with us</span> <span>👋</span>
+        </div>
+</div>
 
       {open && (
         <div
