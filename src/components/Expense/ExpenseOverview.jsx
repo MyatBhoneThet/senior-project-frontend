@@ -7,8 +7,6 @@ import useT from "../../hooks/useT";
 const ExpenseOverview = ({ transactions, onExpenseIncome, onAddExpense }) => {
   const [chartData, setChartData] = useState([]);
   const { t, lang } = useT();
-
-
   const tt = (key, fallback) => {
     const val = t?.(key);
     return val && val !== key ? val : fallback;
@@ -50,7 +48,7 @@ const ExpenseOverview = ({ transactions, onExpenseIncome, onAddExpense }) => {
           <CustomLineChart data={chartData} />
         ) : (
           <p className="text-center text-sm text-gray-400">
-            No expense data available yet.
+            {tt("expense.noData", "No expense data available yet.")}
           </p>
         )}
       </div>

@@ -51,7 +51,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
           <CustomBarChart data={chartData} />
         ) : (
           <p className="text-center text-sm text-gray-400">
-            {tt("dashboard.noIncomeData", "No income data available yet.")}
+            {tt("income.noData", "No income data available yet.")}
           </p>
         )}
       </div>

@@ -73,7 +73,7 @@ export default {
     uploadFailAlert: "Failed to upload photo. However, your profile can still be saved.",
     removeFail: "Failed to remove photo",
   },
-  recurrint:{
+  recurring:{
     title: "Recurring",
     text: "Create rules for salary, rent, etc.",
     recurringTransactions: "Recurring Transactions",
@@ -98,6 +98,7 @@ export default {
     edit: "Edit",
     pause: "Pause",
     delete: "Delete",
+    confirmDelete: "Are you sure you want to delete this rule?",
     day: "Day",
     start: "Start",
     active: "Active",

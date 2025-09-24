@@ -45,7 +45,7 @@ const IncomeList = ({ transactions = [], onDelete, onDownload, onEdit }) => {
         ))}
 
         {transactions.length === 0 && (
-          <div className="text-slate-500 text-sm py-3">No income yet.</div>
+          <div className="text-slate-500 text-sm py-3">{tt("income.noData", "No income yet")}.</div>
         )}
       </div>
     </div>

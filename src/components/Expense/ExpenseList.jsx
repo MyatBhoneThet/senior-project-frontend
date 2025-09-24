@@ -13,10 +13,13 @@ function titleFrom(tx) {
 
 const ExpenseList = ({ transactions = [], onDelete, onDownload, onEdit }) => {
     const { t, lang } = useT();
+    const tt = (key, fallback) => {
+        const val = t?.(key);
+        return val && val !== key ? val : fallback;
+    };
     const { prefs } = useContext(UserContext);
     const isDark = prefs?.theme === 'dark';
     useEffect(() => {}, [lang]);
-      const tt = (k, d) => (t?.(k) || d);
 
 //   const cardClass = isDark ? 'bg-gray-800 border-gray-700 text-gray-200' : 'bg-white border-gray-200/50 text-gray-900';
   const headerClass = 'flex items-center justify-between border-b pb-3 mb-4 ' + (isDark ? 'border-gray-700' : 'border-gray-200');
@@ -46,7 +49,9 @@ const ExpenseList = ({ transactions = [], onDelete, onDownload, onEdit }) => {
           />
         ))}
 
-        {transactions.length === 0 && <div className={emptyClass}>No expenses yet.</div>}
+        {transactions.length === 0 && <div className={emptyClass}>
+            {tt("expense.noData", "No expense data available yet")}
+            </div>}
       </div>
     </div>
   );
