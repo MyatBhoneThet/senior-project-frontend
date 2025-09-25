@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 
-export default function CategorySelect({ type, value, onChange, allowCreate = true }) {
+export default function CategorySelect({
+  type,                 // "expense" | "income"
+  value,                // selected category id
+  onChange,             // (id, name) => void
+  allowCreate = true,
+  isDark = false,       // NEW
+  className = '',       // NEW (extra classes from parent if needed)
+}) {
   const [loading, setLoading] = useState(true);
   const [items, setItems] = useState([]);
   const [newName, setNewName] = useState('');
@@ -41,12 +48,40 @@ export default function CategorySelect({ type, value, onChange, allowCreate = tr
     }
   }
 
-  if (loading) return <div className="input input-disabled">Loading categories…</div>;
+  // Tailwind utility sets for dark/light
+  const inputBase = 'rounded-md border-2 text-sm px-3 py-2 w-full transition-colors duration-150 focus:outline-none';
+  const lightInput = 'bg-white/80 border-gray-200 text-gray-900 placeholder-gray-500 focus:border-emerald-500';
+  const darkInput  = 'bg-gray-900/60 border-gray-600 text-white placeholder-gray-400 focus:border-emerald-500';
+
+  const selectCls = [
+    inputBase,
+    isDark ? darkInput : lightInput,
+    className,                      // allow parent to extend/override
+  ].join(' ');
+
+  const createInputCls = [
+    inputBase,
+    'flex-1',
+    isDark ? darkInput : lightInput,
+  ].join(' ');
+
+  const addBtnCls = [
+    'add-btn add-btn-fill',
+    isDark ? 'text-white' : '',
+  ].join(' ');
+
+  if (loading) {
+    return (
+      <div className={[inputBase, isDark ? darkInput : lightInput, 'opacity-70'].join(' ')}>
+        Loading categories…
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-2">
       <select
-        className="input"
+        className={selectCls}
         value={value || ''}
         onChange={(e) => {
           const id   = e.target.value || '';
@@ -55,18 +90,22 @@ export default function CategorySelect({ type, value, onChange, allowCreate = tr
         }}
       >
         <option value="">Uncategorized</option>
-        {items.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+        {items.map(c => (
+          <option key={c._id} value={c._id}>
+            {c.name}
+          </option>
+        ))}
       </select>
 
       {allowCreate && (
         <form onSubmit={createCategory} className="flex gap-2">
           <input
-            className="input flex-1"
+            className={createInputCls}
             placeholder={`Add ${type} category (e.g. Salary, Food)`}
             value={newName}
             onChange={(e) => setNewName(e.target.value)}
           />
-          <button className="add-btn add-btn-fill" type="submit">Add</button>
+          <button className={addBtnCls} type="submit">Add</button>
         </form>
       )}
     </div>
