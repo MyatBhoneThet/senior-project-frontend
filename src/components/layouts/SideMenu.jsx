@@ -9,7 +9,8 @@ import { LuRefreshCcw } from "react-icons/lu";
 const BACKEND_URL = import.meta.env.VITE_API_BASE_URL;
 
 const baseItem =
-  "w-full flex items-center gap-4 text-[15px] py-3 px-6 rounded-lg mb-3 transition";
+  // added: 'side-link' for CSS accent, 'group' for icon micro-anim, rounded-xl for a softer look
+  "side-link group w-full flex items-center gap-4 text-[15px] py-3 px-6 rounded-xl mb-3 transition";
 
 export default function SideMenu() {
   const { user, clearUser, prefs } = useContext(UserContext);
@@ -17,16 +18,21 @@ export default function SideMenu() {
   const navigate = useNavigate();
 
   const isDarkTheme = prefs?.theme === "dark";
-  const activeItem = "text-white bg-primary";
+
+  // refined active/idle colors only (no logic change)
+  const activeItem = "text-white bg-green-600 shadow-md";
   const idleItem = isDarkTheme
-    ? "text-gray-300 hover:bg-gray-700"
-    : "text-slate-800 hover:bg-gray-100";
+    ? "text-slate-300 hover:bg-slate-800 hover:text-violet-300"
+    : "text-slate-700 hover:bg-violet-50 hover:text-violet-700";
+
   const containerClass = isDarkTheme
     ? "w-64 h-[calc(100vh-64px)] bg-gray-900 border-r border-gray-700/50 p-5 sticky top-[64px] z-20"
     : "w-64 h-[calc(100vh-64px)] bg-white border-r border-gray-200/50 p-5 sticky top-[64px] z-20";
+
   const userNameClass = isDarkTheme
     ? "text-gray-100 font-medium leading-6"
     : "text-gray-950 font-medium leading-6";
+
   const avatarBgClass = isDarkTheme ? "bg-gray-700" : "bg-slate-400";
 
   const pathToI18nKey = (path) => {
@@ -119,7 +125,7 @@ export default function SideMenu() {
               onClick={handleLogout}
               className={`${baseItem} ${idleItem} text-left`}
             >
-              {Icon ? <Icon className="text-xl" /> : null}
+              {Icon ? <Icon className="text-xl transition-transform group-hover:translate-x-0.5" /> : null}
               {labelText}
             </button>
           );
@@ -134,7 +140,7 @@ export default function SideMenu() {
               `${baseItem} ${isActive ? activeItem : idleItem}`
             }
           >
-            {Icon ? <Icon className="text-xl" /> : null}
+            {Icon ? <Icon className="text-xl transition-transform group-hover:translate-x-0.5" /> : null}
             {labelText}
           </NavLink>
         );

@@ -24,7 +24,7 @@ const ProfilePage = () => {
   const normalizePhoto = (profilePhoto) => {
     if (!profilePhoto) return null;
     if (profilePhoto.data) return `data:${profilePhoto.contentType};base64,${profilePhoto.data}`;
-    if (profilePhoto.startsWith("http")) return profilePhoto;
+    if (typeof profilePhoto === "string" && profilePhoto.startsWith("http")) return profilePhoto;
     return `${BACKEND_URL}/${profilePhoto}`;
   };
 
@@ -55,7 +55,9 @@ const ProfilePage = () => {
         updateUser(transformed);
         setFormData(transformed);
       })
-      .catch((err) => console.error(tt("profile.fetchError", "Failed to fetch profile"), err));
+      .catch((err) =>
+        console.error(tt("profile.fetchError", "Failed to fetch profile"), err)
+      );
   }, []);
 
   const setField = (key, value) => {
@@ -126,25 +128,35 @@ const ProfilePage = () => {
       alert(tt("profile.updateSuccess", "Profile updated successfully!"));
     } catch (err) {
       console.error(err);
-      const msg = err.response?.data?.message || err.message || tt("profile.updateFail", "Failed to save profile");
+      const msg =
+        err.response?.data?.message ||
+        err.message ||
+        tt("profile.updateFail", "Failed to save profile");
       alert(msg);
     } finally {
       setSaving(false);
     }
   };
 
-  // Theme-based classes
+  // Theme-based classes (GREEN primary)
   const containerClass = isDarkTheme
     ? "min-h-screen bg-gray-900 text-gray-100"
     : "min-h-screen bg-gray-50 text-gray-900";
+
   const cardClass = isDarkTheme
     ? "bg-gray-800 border border-gray-700 rounded-2xl p-8 shadow-sm text-gray-100"
     : "bg-white border border-gray-300 rounded-2xl p-8 shadow-sm text-gray-900";
+
   const labelClass = isDarkTheme ? "text-gray-200" : "text-gray-700";
+
+  // Focus ring + border switched from purple -> GREEN (use your primary utilities)
   const inputClass = isDarkTheme
-    ? "w-full border border-gray-700 rounded-lg px-4 py-3 bg-gray-900 text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors"
-    : "w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-colors";
-  const buttonClass = "bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
+    ? "w-full border border-gray-700 rounded-lg px-4 py-3 bg-gray-900 text-gray-100 placeholder-gray-400 focus:ring-2 focus:ring-primary-100 focus:border-green-400 transition-colors"
+    : "w-full border border-gray-300 rounded-lg px-4 py-3 bg-white text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-primary-100 focus:border-green-400 transition-colors";
+
+  // Save button switched from purple -> GREEN using .bg-primary utilities
+  const buttonClass =
+    "bg-primary hover:bg-primary-700 text-white font-semibold px-6 py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed";
 
   return (
     <DashboardLayout activeMenu="Profile">
