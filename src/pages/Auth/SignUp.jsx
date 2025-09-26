@@ -198,9 +198,6 @@ const SignUp = () => {
 
           <form onSubmit={handleSignUp} className="space-y-5">
             <div className="flex justify-center mb-6">
-              <div className="transform transition-all duration-300 hover:scale-110">
-                <ProfilePhotoSelector image={profilePic} setImage={setProfilePic} />
-              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
