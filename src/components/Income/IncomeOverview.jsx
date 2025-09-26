@@ -31,7 +31,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
           <h5 className="text-lg font-semibold">
             {tt("income.incomeOverview", "Income Overview")}
           </h5>
-          <p className="text-xs text-gray-400 mt-0.5">
+          <p className="text-xs text-gray-400 -mt-">
             {tt("income.text", "Track your earnings over time and analyze your income trends.")}
           </p>
         </div>
@@ -46,7 +46,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
       </div>
 
       {/* Chart */}
-      <div className="mt-10">
+      <div className="mt-3">
         {chartData.length > 0 ? (
           <CustomBarChart data={chartData} />
         ) : (

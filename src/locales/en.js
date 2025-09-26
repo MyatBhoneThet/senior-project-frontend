@@ -10,7 +10,7 @@ export default {
     recentIncome: "Recent Income",
     recentExpense: "Recent Expense",
     expenses: "Expenses",
-    income: "Income",
+    income: "Incomes",
      incomeSources: "Income Sources",
     download: "Download",
     delete: "Delete",

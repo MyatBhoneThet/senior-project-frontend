@@ -21,16 +21,21 @@ const Last30DaysExpenses = ({ date }) => {
   }, [date]);
 
   return (
-    <div className="card col-span-1">
-      <div className="flex items-center justify-between">
-        <h5 className="text-lg">
-          {tt('dashboard.last30DaysExpenses', 'Last 30 Days Expenses')}
-        </h5>
-      </div>
-
-      <CustomBarChart data={chartData} />
+  <div className="card col-span-1 p-4">
+    <div className="flex items-center justify-between mb-4">
+      <h5 className="text-lg">
+        {tt('dashboard.last30DaysExpenses', 'Last 30 Days Expenses')}
+      </h5>
     </div>
-  );
+
+    {/* Center the BarChart */}
+    <div className="flex justify-center">
+      <div style={{ width: '90%', maxWidth: 500, height: 200 }}>
+        <CustomBarChart data={chartData} />
+      </div>
+    </div>
+  </div>
+);
 };
 
 export default Last30DaysExpenses;

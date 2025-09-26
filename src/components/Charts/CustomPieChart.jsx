@@ -14,14 +14,12 @@ const CustomPieChart = ({ data = [], label, colors, totalAmount }) => {
   const { prefs } = useContext(UserContext);
   const isDark = prefs?.theme === 'dark';
 
-  // Fallback to theme-driven green palette if parent didn't pass colors
   const palette = useMemo(() => {
     if (Array.isArray(colors) && colors.length) return colors;
-    const P600 = cssVar('--color-primary',     '#16A34A');
+    const P600 = cssVar('--color-primary', '#16A34A');
     const P500 = cssVar('--color-primary-500', '#22C55E');
     const P200 = cssVar('--color-primary-200', '#BBF7D0');
     const P100 = cssVar('--color-primary-100', '#DCFCE7');
-    // Add a mid tone for variety
     const P400 = '#34D399';
     return [P600, P500, P400, P200, P100];
   }, [colors]);
@@ -32,8 +30,9 @@ const CustomPieChart = ({ data = [], label, colors, totalAmount }) => {
   const tooltipShell = isDark ? 'bg-gray-800 text-gray-200 border-gray-600' : 'bg-white text-gray-900 border-gray-300';
 
   return (
-    <div className={`${containerBg} p-2 rounded-lg`}>
-      <ResponsiveContainer width="100%" height={300}>
+    <div className={`${containerBg} p-2 rounded-lg relative -mt-1`}>
+      {/* Use negative margin to lift chart */}
+      <ResponsiveContainer width="100%" height={280}>
         <PieChart>
           <Pie
             data={data}

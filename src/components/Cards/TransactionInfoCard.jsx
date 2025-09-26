@@ -11,7 +11,7 @@ const TransactionInfoCard = ({
   type,          // 'income' | 'expense'
   hideDeleteBtn,
   onDelete,
-  onEdit,        // ← NEW
+  onEdit,
 }) => {
   const { prefs } = useContext(UserContext) || {};
   const appCurrency = prefs?.currency || 'THB';
@@ -40,18 +40,21 @@ const TransactionInfoCard = ({
         : 'bg-white border-gray-200/50 hover:bg-gray-50 text-gray-900'
       }`}
     >
+      {/* Left icon */}
       <div className={`w-12 h-12 flex items-center justify-center text-xl rounded-full drop-shadow-lg
         ${isDark ? 'bg-gray-700 text-gray-200' : 'bg-gray-100 text-gray-700'}`}>
         {renderIcon()}
       </div>
 
-      <div className="flex-1 flex items-center justify-between">
-        <div>
-          <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-sm font-medium`}>{title}</p>
-          <p className={`${isDark ? 'text-gray-400' : 'text-gray-400'} text-xs mt-1`}>{date}</p>
+      {/* Center text container */}
+      <div className="flex-1 min-w-0 flex items-center justify-between">
+        <div className="min-w-0">
+          <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'} text-sm font-medium truncate`}>{title}</p>
+          <p className={`${isDark ? 'text-gray-400' : 'text-gray-400'} text-xs mt-1 truncate`}>{date}</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        {/* Right amount + buttons */}
+        <div className="flex items-center gap-2 flex-shrink-0">
           {typeof onEdit === 'function' && (
             <button
               type="button"
@@ -77,7 +80,7 @@ const TransactionInfoCard = ({
           )}
 
           <div className={`flex items-center gap-2 px-3 py-1.5 rounded-md ${getAmountStyles()}`}>
-            <h6 className="text-xs font-medium">
+            <h6 className="text-xs font-medium truncate">
               {sign}{formattedAmount}
             </h6>
             {type === 'income' ? <LuTrendingUp /> : <LuTrendingDown />}

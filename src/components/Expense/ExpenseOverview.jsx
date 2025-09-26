@@ -4,7 +4,7 @@ import { prepareExpenseLineChartData } from "../../utils/helper";
 import CustomLineChart from "../Charts/CustomLineChart";
 import useT from "../../hooks/useT";
 
-const ExpenseOverview = ({ transactions, onExpenseIncome, onAddExpense }) => {
+const ExpenseOverview = ({ transactions, onAddExpense }) => {
   const [chartData, setChartData] = useState([]);
   const { t, lang } = useT();
   const tt = (key, fallback) => {
@@ -43,15 +43,17 @@ const ExpenseOverview = ({ transactions, onExpenseIncome, onAddExpense }) => {
               </div>
 
       {/* Chart */}
-      <div className="mt-10">
-        {chartData.length > 0 ? (
-          <CustomLineChart data={chartData} />
-        ) : (
-          <p className="text-center text-sm text-gray-400">
-            {tt("expense.noData", "No expense data available yet.")}
-          </p>
-        )}
-      </div>
+<div className="mt-10 flex justify-end">
+  <div className="w-[100%] max-w-[5400px] h-[250px]">
+    {chartData.length > 0 ? (
+      <CustomLineChart data={chartData} />
+    ) : (
+      <p className="text-center text-sm text-gray-400">
+        {tt("expense.noData", "No expense data available yet.")}
+      </p>
+    )}
+  </div>
+</div>
     </div>
   );
 };

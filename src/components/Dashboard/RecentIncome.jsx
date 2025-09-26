@@ -16,7 +16,7 @@ const RecentIncome = ({ transactions, onSeeMore }) => {
   return (
     <div className="card">
       <div className="flex items-center justify-between">
-        <h5 className="text-lg">{tt('dashboard.income', 'Income')}</h5>
+        <h5 className="text-lg">{tt('dashboard.income', 'Incomes')}</h5>
 
         <button className="card-btn" onClick={onSeeMore}>
           {tt('dashboard.seeMore', 'See More')} <LuArrowRight className="text-base" />
@@ -24,18 +24,20 @@ const RecentIncome = ({ transactions, onSeeMore }) => {
       </div>
 
       <div className="mt-6">
-        {transactions?.slice(0, 3)?.map((item) => (
-          <TransactionInfoCard
-            key={item._id}
-            title={item.source}
-            icon={item.icon}
-            date={moment(item.date).format('Do MMM YYYY')}
-            amount={item.amount}
-            type="income"
-            hideDeleteBtn
-          />
-        ))}
-      </div>
+  {transactions?.slice(0, 3)?.map((item, index) => (
+    <TransactionInfoCard
+      key={item._id}
+      title={item.source}
+      icon={item.icon}
+      date={moment(item.date).format('Do MMM YYYY')}
+      amount={item.amount}
+      type="income"
+      hideDeleteBtn
+      className={index > 0 ? 'mt-2' : ''} // spacing between cards
+    />
+  ))}
+</div>
+
     </div>
   );
 };
