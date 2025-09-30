@@ -1,7 +1,7 @@
 import React, { useContext } from 'react';
 import { LuUtensils, LuTrendingUp, LuTrendingDown, LuTrash2, LuPencilLine } from 'react-icons/lu';
 import { UserContext } from '../../context/UserContext';
-import { formatCurrency } from '../../utils/currency';
+import { useCurrency } from '../../context/CurrencyContext';
 
 const TransactionInfoCard = ({
   title,
@@ -26,7 +26,8 @@ const TransactionInfoCard = ({
   };
 
   const sign = type === 'income' ? '+' : '-';
-  const formattedAmount = formatCurrency(Number(amount || 0), appCurrency);
+  const { format } = useCurrency();
+  const formattedAmount = format(Number(amount || 0));
 
   const getAmountStyles = () =>
     type === 'income'

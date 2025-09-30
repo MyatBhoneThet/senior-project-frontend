@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import CustomPieChart from '../../components/Charts/CustomPieChart';
 import { UserContext } from '../../context/UserContext';
 import useT from '../../hooks/useT';
+import { useCurrency } from '../../context/CurrencyContext';
 
 // Example currency symbols map
 const currencySymbols = {
@@ -16,7 +17,7 @@ const COLORS = ["#875CF5", "#FA2C37", "#FF6900"];
 
 const FinanceOverview = ({ totalBalance, totalExpense, totalIncome }) => {
   const { prefs } = useContext(UserContext); // get selected currency
-  const currencySymbol = currencySymbols[prefs?.currency] || '';
+  const { format } = useCurrency();
   const { t } = useT();
 
   const balanceData = [
@@ -34,11 +35,11 @@ const FinanceOverview = ({ totalBalance, totalExpense, totalIncome }) => {
       <CustomPieChart
         data={balanceData.map(item => ({
           ...item,
-          name: `${item.name} (${currencySymbol}${item.amount})`
+          name: `${item.name} (${format(item.amount)})`
         }))}
         colors={COLORS}
         label="Total Balance"
-        totalAmount={`${currencySymbol}${totalBalance}`}
+        totalAmount={format(totalBalance)}
         showTextAnchor={true}
         // NEW: ensure center text is bright in dark mode, readable in light mode
         centerTextClass="text-slate-900 dark:text-white"
