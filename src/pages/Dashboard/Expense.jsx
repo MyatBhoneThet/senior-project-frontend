@@ -9,13 +9,20 @@ import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
 import { toast } from 'react-toastify';
 import { useUserAuth } from '../../hooks/useUserAuth';
-import { syncRecurring } from '../../utils/syncRecurring'; // ← use the shared helper
+import { syncRecurring } from '../../utils/syncRecurring';
+
+// NEW
+import FilterControl from '../../components/common/FilterControl';
+// import { applyFilterSort } from '../../utils/filtering';
 
 const Expense = () => {
   useUserAuth();
 
   const [expenseData, setExpenseData] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // NEW: hold filtered results
+  const [filteredExpense, setFilteredExpense] = useState([]);
 
   const [openDeleteAlert, setOpenDeleteAlert] = useState({ show: false, data: null });
   const [openAddExpenseModal, setOpenAddExpenseModal] = useState(false);
@@ -33,7 +40,10 @@ const Expense = () => {
       await syncRecurring({ silent: true });
       const { data } = await axiosInstance.get(API_PATHS.EXPENSE.GET_ALL_EXPENSE);
       if (!mounted.current) return;
-      setExpenseData(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : [];
+      setExpenseData(list);
+      // NEW: initial filtered = full list
+      setFilteredExpense(list);
     } catch (error) {
       console.error(error);
       toast.error('Something went wrong. Please try again.');
@@ -137,8 +147,18 @@ const Expense = () => {
             onAddExpense={() => setOpenAddExpenseModal(true)}
           />
 
+          {/* NEW: small toolbar to place Filter beside Download area */}
+          <div className="flex items-center justify-end">
+            <FilterControl
+              items={expenseData}
+              fieldMap={{ date: 'date', category: 'category', amount: 'amount', text: 'source' }}
+              onChange={(list /*, state */) => setFilteredExpense(list)}
+              label="Filter"
+            />
+          </div>
+
           <ExpenseList
-            transactions={expenseData}
+            transactions={filteredExpense} // NEW: pass filtered list
             onDelete={(id) => setOpenDeleteAlert({ show: true, data: id })}
             onDownload={handleDownloadExpenseDetails}
             // ← NEW: open edit modal with selected item

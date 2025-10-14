@@ -3,9 +3,11 @@ import { LuPlus } from "react-icons/lu";
 import CustomBarChart from "../Charts/CustomBarChart";
 import { prepareIncomeBarChartData } from "../../utils/helper";
 import useT from "../../hooks/useT";
+import { useCurrency } from "../../context/CurrencyContext";
 
 const IncomeOverview = ({ transactions, onAddIncome }) => {
   const [chartData, setChartData] = useState([]);
+  const { convert } = useCurrency();
   const { t, lang } = useT();
 
   // fallback translator
@@ -17,7 +19,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
   useEffect(() => {
     if (transactions && transactions.length > 0) {
       const result = prepareIncomeBarChartData(transactions);
-      setChartData(result);
+      setChartData(result.map(d => ({ ...d, amount: convert(d.amount) })));
     } else {
       setChartData([]);
     }

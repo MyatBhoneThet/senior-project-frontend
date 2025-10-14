@@ -3,9 +3,11 @@ import { LuPlus } from "react-icons/lu";
 import { prepareExpenseLineChartData } from "../../utils/helper";
 import CustomLineChart from "../Charts/CustomLineChart";
 import useT from "../../hooks/useT";
+import { useCurrency } from "../../context/CurrencyContext";
 
 const ExpenseOverview = ({ transactions, onAddExpense }) => {
   const [chartData, setChartData] = useState([]);
+  const { convert } = useCurrency();
   const { t, lang } = useT();
   const tt = (key, fallback) => {
     const val = t?.(key);
@@ -14,7 +16,7 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
   useEffect(() => {
     if (transactions && transactions.length > 0) {
       const result = prepareExpenseLineChartData(transactions);
-      setChartData(result);
+      setChartData(result.map(d => ({ ...d, amount: convert(d.amount) })));
     } else {
       setChartData([]);
     }

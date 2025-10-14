@@ -18,6 +18,8 @@ export default function RecurringForm({ initial, onSaved, onCancel }) {
     category: 'Rent',
     source: '',
     amount: initial ? String(initial.amount ?? '') : '',
+    // NEW: frequency (defaults to monthly; your engine also supports it)
+    repeat: 'monthly',
     dayOfMonth: 1,
     startDate: new Date().toISOString().slice(0,10),
     endDate: '',
@@ -38,6 +40,8 @@ export default function RecurringForm({ initial, onSaved, onCancel }) {
         category: form.category,
         source: form.source || '',
         amount: Number(form.amount),
+        // NEW: send repeat; default to monthly for legacy docs
+        repeat: (form.repeat || 'monthly').toLowerCase(),
         dayOfMonth: Number(form.dayOfMonth || 1),
         startDate: form.startDate,
         endDate: form.endDate || undefined,
@@ -51,6 +55,7 @@ export default function RecurringForm({ initial, onSaved, onCancel }) {
         await axiosInstance.post(API_PATHS.RECURRING.BASE, body);
       }
 
+      // run generator so the new rule materializes immediately
       await axiosInstance.post(`${API_PATHS.RECURRING.BASE}/run`);
 
       onSaved?.();
@@ -116,6 +121,20 @@ export default function RecurringForm({ initial, onSaved, onCancel }) {
             value={form.amount}
             onChange={(e)=>setField('amount', Number(e.target.value))}
           />
+        </label>
+
+        {/* NEW: Frequency selector */}
+        <label className="flex flex-col text-sm">
+          {tt('recurring.frequency', 'Frequency')}
+          <select
+            className={inputClass}
+            value={form.repeat || 'monthly'}
+            onChange={(e)=>setField('repeat', e.target.value)}
+          >
+            <option value="weekly">{tt('recurring.weekly', 'Weekly')}</option>
+            <option value="monthly">{tt('recurring.monthly', 'Monthly')}</option>
+            <option value="yearly">{tt('recurring.yearly', 'Yearly')}</option>
+          </select>
         </label>
 
         <label className="flex flex-col text-sm">

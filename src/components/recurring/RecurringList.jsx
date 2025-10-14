@@ -54,6 +54,32 @@ export default function RecurringList() {
     }
   }
 
+  // ---------- NEW: small helpers for displaying frequency nicely ----------
+  function labelRepeat(rep) {
+    const r = String(rep || 'monthly').toLowerCase();
+    if (r === 'daily') return tt('recurring.daily', 'Daily');
+    if (r === 'weekly') return tt('recurring.weekly', 'Weekly');
+    if (r === 'biweekly') return tt('recurring.biweekly', 'Bi-Weekly');
+    if (r === 'yearly') return tt('recurring.yearly', 'Yearly');
+    return tt('recurring.monthly', 'Monthly');
+  }
+
+  function whenText(rule) {
+    const rep = String(rule?.repeat || 'monthly').toLowerCase();
+    const start = rule?.startDate ? new Date(rule.startDate) : new Date();
+    const weekday = start.toLocaleDateString(undefined, { weekday: 'long' });
+    const md = start.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    const dom = rule?.dayOfMonth || start.getDate();
+
+    if (rep === 'daily') return tt('recurring.when.daily', 'Every day');
+    if (rep === 'weekly') return `${tt('recurring.when.everyWeekOn', 'Every week on')} ${weekday}`;
+    if (rep === 'biweekly') return `${tt('recurring.when.every2WeeksOn', 'Every 2 weeks on')} ${weekday}`;
+    if (rep === 'yearly') return `${tt('recurring.when.everyYearOn', 'Every year on')} ${md}`;
+    // monthly (default)
+    return `${tt('recurring.when.dayEachMonth', 'Day')} ${dom} ${tt('recurring.when.eachMonth', 'each month')}`;
+  }
+  // -----------------------------------------------------------------------
+
   const btnClass = `px-3 py-1.5 rounded-md font-medium text-sm transition-colors duration-200 flex-shrink-0 min-w-0 text-center
     ${isDark ? 'bg-gray-700 hover:bg-gray-600 text-gray-200'
       : 'bg-gray-100 hover:bg-gray-200 text-gray-900'}`;
@@ -61,6 +87,10 @@ export default function RecurringList() {
   const primaryBtnClass = `px-3 py-1.5 rounded-md font-medium text-sm transition-colors duration-200 flex-shrink-0 min-w-0 text-center
     ${isDark ? 'bg-purple-600 hover:bg-purple-500 text-gray-200'
       : 'bg-purple-100 hover:bg-purple-200 text-purple-700'}`;
+
+  // small pill style for frequency
+  const pillClass = `ml-2 inline-flex items-center px-2 py-0.5 rounded-full border text-xs
+    ${isDark ? 'border-gray-600 text-gray-200' : 'border-gray-300 text-gray-700'}`;
 
   return (
     <div className="space-y-6">
@@ -111,11 +141,15 @@ export default function RecurringList() {
                   {/* Content Section */}
                   <div className="min-w-0 flex-1">
                     <div className="font-medium">
-                      {rule.type === 'income' ? tt('recurring.income', 'Income') : t('recurring.expense', 'Expense')} — {rule.category}
+                      {rule.type === 'income' ? tt('recurring.income', 'Income') : tt('recurring.expense', 'Expense')}
+                      {' — '}{rule.category}
+                      {/* NEW: frequency pill */}
+                      <span className={pillClass}>{labelRepeat(rule.repeat)}</span>
                     </div>
+
                     <div className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>
                       {rule.source ? `${rule.source} • ` : ''}฿{Number(rule.amount).toLocaleString()}
-                      {' • '}{tt('recurring.day', 'day')} {rule.dayOfMonth}
+                      {' • '}{whenText(rule)}
                       {' • '}{tt('recurring.start', 'start')} {String(rule.startDate).slice(0,10)}
                       {rule.endDate ? ` • ${tt('recurring.end', 'end')} ${String(rule.endDate).slice(0,10)}` : ''}
                       {rule.isActive ? ` • ${tt('recurring.active', 'active')}` : ` • ${tt('recurring.paused', 'paused')}`}

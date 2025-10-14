@@ -7,7 +7,7 @@ import { API_PATHS } from '../../utils/apiPaths';
 import InfoCard from '../../components/Cards/InfoCard';
 import RecentTransactions from '../../components/Dashboard/RecentTransactions';
 import { UserContext } from '../../context/UserContext';
-import { formatCurrency } from '../../utils/currency';
+import { useCurrency } from '../../context/CurrencyContext';
 import useT from '../../hooks/useT';
 
 import { LuHandCoins, LuWalletMinimal } from 'react-icons/lu';
@@ -17,23 +17,21 @@ import ExpenseTransactions from '../../components/Dashboard/ExpenseTransactions'
 import Last30DaysExpenses from '../../components/Dashboard/Last30DaysExpenses';
 import RecentIncomeWithChart from '../../components/Dashboard/RecentIncomeWithChart';
 import RecentIncome from '../../components/Dashboard/RecentIncome';
+import ChatWidget from '../../components/Chat/ChatWidget';
 
-import ChatWidget from '../../components/Chat/ChatWidget'; // left-only widget
+import SavingsQuickCard from '../../components/savings/SavingQuickCard';
 
 const Home = () => {
   useUserAuth();
-
   const navigate = useNavigate();
   const { t } = useT();
 
   const [dashboardData, setDashboardData] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // get prefs from context (currency/language/theme)
   const { prefs } = useContext(UserContext) || {};
-  const appCurrency = prefs?.currency || 'THB';
-  const appLanguage = prefs?.language || 'en';
-  const appTheme = prefs?.theme || 'light'; // <<--- add theme here
+  const { format } = useCurrency();           // ✅ use currency formatter everywhere
+  const appTheme = prefs?.theme || 'light';
 
   const fetchDashboardData = async () => {
     if (loading) return;
@@ -48,36 +46,29 @@ const Home = () => {
     }
   };
 
-  useEffect(() => {
-    fetchDashboardData();
-    return () => {};
-  }, []);
+  useEffect(() => { fetchDashboardData(); }, []);
 
   return (
     <DashboardLayout activeMenu="Dashboard">
-      {/* Theme wrapper */}
       <div className={`${appTheme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'} min-h-screen my-5 mx-auto`}>
-        
         {/* Top summary cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <InfoCard
             icon={<IoMdCard />}
             label={t('dashboard.totalBalance')}
-            value={formatCurrency(dashboardData?.totalBalance || 0, appCurrency, appLanguage)}
+            value={format(dashboardData?.totalBalance || 0)}   // ✅
             color="bg-indigo-500"
           />
-
           <InfoCard
             icon={<LuWalletMinimal />}
             label={t('dashboard.totalIncome')}
-            value={formatCurrency(dashboardData?.totalIncome || 0, appCurrency, appLanguage)}
+            value={format(dashboardData?.totalIncome || 0)}     // ✅
             color="bg-orange-500"
           />
-
           <InfoCard
             icon={<LuHandCoins />}
             label={t('dashboard.totalExpenses')}
-            value={formatCurrency(dashboardData?.totalExpenses || 0, appCurrency, appLanguage)}
+            value={format(dashboardData?.totalExpenses || 0)}   // ✅
             color="bg-red-500"
           />
         </div>
@@ -115,9 +106,12 @@ const Home = () => {
             onSeeMore={() => navigate('/income')}
           />
         </div>
-      </div>
 
-      {/* Chatbot pinned on the LEFT only */}
+        {/* ADDED: small Savings summary card with link to /savings */}
+        <div className="mt-6">
+          <SavingsQuickCard />
+        </div>
+      </div>
       <ChatWidget />
     </DashboardLayout>
   );

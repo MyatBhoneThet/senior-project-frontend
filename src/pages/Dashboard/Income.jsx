@@ -9,13 +9,20 @@ import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
 import { toast } from 'react-toastify';
 import { useUserAuth } from '../../hooks/useUserAuth';
-import { syncRecurring } from '../../utils/syncRecurring'; // ← shared helper
+import { syncRecurring } from '../../utils/syncRecurring';
+
+// NEW
+import FilterControl from '../../components/common/FilterControl';
+// import { applyFilterSort } from '../../utils/filtering';
 
 const Income = () => {
   useUserAuth();
 
   const [incomeData, setIncomeData] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  // NEW: hold filtered results
+  const [filteredIncome, setFilteredIncome] = useState([]);
 
   const [openDeleteAlert, setOpenDeleteAlert] = useState({ show: false, data: null });
   const [openAddIncomeModal, setOpenAddIncomeModal] = useState(false);
@@ -33,7 +40,10 @@ const Income = () => {
       await syncRecurring({ silent: true });
       const { data } = await axiosInstance.get(API_PATHS.INCOME.GET_ALL_INCOME);
       if (!mounted.current) return;
-      setIncomeData(Array.isArray(data) ? data : []);
+      const list = Array.isArray(data) ? data : [];
+      setIncomeData(list);
+      // NEW: initial filtered = full list
+      setFilteredIncome(list);
     } catch (error) {
       console.error(error);
       toast.error('Something went wrong. Please try again.');
@@ -138,8 +148,18 @@ const Income = () => {
             onAddIncome={() => setOpenAddIncomeModal(true)}
           />
 
+          {/* NEW: small toolbar to place Filter beside Download area */}
+          <div className="flex items-center justify-end">
+            <FilterControl
+              items={incomeData}
+              fieldMap={{ date: 'date', category: 'category', amount: 'amount', text: 'source' }}
+              onChange={(list /*, state */) => setFilteredIncome(list)}
+              label="Filter"
+            />
+          </div>
+
           <IncomeList
-            transactions={incomeData}
+            transactions={filteredIncome} // NEW: pass filtered list
             onDelete={(id) => setOpenDeleteAlert({ show: true, data: id })}
             onDownload={handleDownloadIncomeDetails}
             // ← NEW: open edit modal with selected item
