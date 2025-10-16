@@ -2,8 +2,9 @@ import React, { useContext, useMemo } from 'react';
 import { XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Area, AreaChart } from 'recharts';
 import { UserContext } from '../../context/UserContext';
 import { useCurrency } from '../../context/CurrencyContext';
+import moment from 'moment';
 
-const CustomLineChart = ({ data = [] }) => {
+const CustomLineChart = ({ data = [], xDataKey = 'date' }) => {
   const { prefs } = useContext(UserContext);
   const isDark = prefs?.theme === 'dark';
   const { format } = useCurrency();
@@ -18,9 +19,19 @@ const CustomLineChart = ({ data = [] }) => {
     if (active && payload && payload.length) {
       const p = payload[0]?.payload || {};
       return (
-        <div className={`shadow-md rounded-lg p-2 border ${isDark ? 'bg-gray-800 border-gray-600 text-gray-200' : 'bg-white border-gray-300 text-gray-900'}`}>
-          <p className={`text-xs font-semibold mb-1 ${isDark ? 'text-red-300' : 'text-red-800'}`}>{p.category ?? p.month}</p>
-          <p className="text-sm">Amount: <span className="text-sm font-medium">{format(p.amount)}</span></p>
+        <div
+          className={`shadow-md rounded-lg p-2 border ${
+            isDark
+              ? 'bg-gray-800 border-gray-600 text-gray-200'
+              : 'bg-white border-gray-300 text-gray-900'
+          }`}
+        >
+          <p className={`text-xs font-semibold mb-1 ${isDark ? 'text-red-300' : 'text-red-800'}`}>
+            {moment(p.date).format('MMM DD, YYYY')}
+          </p>
+          <p className="text-sm">
+            Amount: <span className="text-sm font-medium">{format(p.amount)}</span>
+          </p>
         </div>
       );
     }
@@ -41,10 +52,23 @@ const CustomLineChart = ({ data = [] }) => {
             </linearGradient>
           </defs>
           <CartesianGrid stroke={gridStroke} strokeDasharray="3 3" />
-          <XAxis dataKey="month" tick={{ fontSize: 12, fill: tickColor }} stroke="none" />
+          <XAxis
+            dataKey={xDataKey}
+            tickFormatter={(date) => moment(date).format('MMM D')}
+            tick={{ fontSize: 12, fill: tickColor }}
+            stroke="none"
+          />
           <YAxis tick={{ fontSize: 12, fill: tickColor }} stroke="none" />
           <Tooltip content={<CustomTooltip />} />
-          <Area type="monotone" dataKey="amount" stroke={colors.PRIMARY} fill="url(#areaPrimaryRed)" strokeWidth={3} dot={{ r: 3, fill: colors.P300 }} activeDot={{ r: 4 }} />
+          <Area
+            type="monotone"
+            dataKey="amount"
+            stroke={colors.PRIMARY}
+            fill="url(#areaPrimaryRed)"
+            strokeWidth={3}
+            dot={{ r: 3, fill: colors.P300 }}
+            activeDot={{ r: 4 }}
+          />
         </AreaChart>
       </ResponsiveContainer>
     </div>

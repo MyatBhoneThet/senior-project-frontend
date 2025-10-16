@@ -1,36 +1,85 @@
-import React, { useContext, useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
-import { UserContext } from '../../context/UserContext';
-import { useCurrency } from '../../context/CurrencyContext';
+import React, { useContext, useMemo } from "react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from "recharts";
+import { UserContext } from "../../context/UserContext";
+import { useCurrency } from "../../context/CurrencyContext";
+import moment from "moment";
 
 const cssVar = (name, fallback) => {
-  if (typeof window === 'undefined') return fallback;
+  if (typeof window === "undefined") return fallback;
   const v = getComputedStyle(document.documentElement).getPropertyValue(name);
-  return (v || '').trim() || fallback;
+  return (v || "").trim() || fallback;
 };
 
 const CustomBarChart = ({ data = [] }) => {
   const { prefs } = useContext(UserContext);
-  const isDark = prefs?.theme === 'dark';
+  const isDark = prefs?.theme === "dark";
   const { format } = useCurrency();
 
   const COLORS = useMemo(() => {
-    const PRIMARY = cssVar('--color-primary', '#16A34A');
-    const P500    = cssVar('--color-primary-500', '#22C55E');
+    const PRIMARY = cssVar("--color-primary", "#16A34A");
+    const P500 = cssVar("--color-primary-500", "#22C55E");
     return [PRIMARY, P500, PRIMARY, P500, PRIMARY, P500, PRIMARY, P500];
   }, []);
 
-  const gridStroke = isDark ? '#3F3F46' : cssVar('--color-primary-100', '#DCFCE7');
-  const tickColor  = isDark ? '#E5E7EB' : '#334155';
+  const gridStroke = isDark ? "#3F3F46" : cssVar("--color-primary-100", "#DCFCE7");
+  const tickColor = isDark ? "#E5E7EB" : "#334155";
+
+  // ✅ Robust date formatter
+  const safeFormatDate = (entry) => {
+    // Detect valid date key (date, createdAt, transactionDate)
+    const rawDate = entry?.date || entry?.createdAt || entry?.transactionDate;
+    if (!rawDate) return "";
+
+    const parsed = moment(rawDate, [
+      moment.ISO_8601,
+      "YYYY-MM-DD",
+      "YYYY/MM/DD",
+      "DD-MM-YYYY",
+      "D MMM YYYY",
+      "MMM D, YYYY",
+      "YYYY-MM-DDTHH:mm:ss.SSSZ",
+    ]);
+
+    return parsed.isValid() ? parsed.format("MMM D") : "";
+  };
 
   const CustomToolTip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const p = payload[0]?.payload || {};
+      const dateLabel = safeFormatDate(p);
       return (
-        <div className={`shadow-md rounded-lg p-2 border ${isDark ? 'bg-gray-800 border-gray-600 text-gray-200' : 'bg-white border-gray-300 text-gray-900'}`}>
-          <p className={`text-xs font-semibold mb-1 ${isDark ? 'text-green-300' : 'text-green-800'}`}>{p.source || p.month}</p>
-          <p className={`${isDark ? 'text-gray-300' : 'text-gray-600'}`}>
-            Amount: <span className={`${isDark ? 'text-white' : 'text-gray-900'} font-medium`}>{format(p.amount)}</span>
+        <div
+          className={`shadow-md rounded-lg p-2 border ${
+            isDark
+              ? "bg-gray-800 border-gray-600 text-gray-200"
+              : "bg-white border-gray-300 text-gray-900"
+          }`}
+        >
+          <p
+            className={`text-xs font-semibold mb-1 ${
+              isDark ? "text-green-300" : "text-green-800"
+            }`}
+          >
+            {dateLabel || "Unknown date"}
+          </p>
+          <p className={`${isDark ? "text-gray-300" : "text-gray-600"}`}>
+            Amount:{" "}
+            <span
+              className={`${
+                isDark ? "text-white" : "text-gray-900"
+              } font-medium`}
+            >
+              {format(p.amount)}
+            </span>
           </p>
         </div>
       );
@@ -39,15 +88,34 @@ const CustomBarChart = ({ data = [] }) => {
   };
 
   return (
-    <div className={isDark ? 'bg-gray-900 mt-2 p-2 rounded-lg' : 'bg-white mt-2 p-2 rounded-lg'}>
+    <div
+      className={
+        isDark ? "bg-gray-900 mt-2 p-2 rounded-lg" : "bg-white mt-2 p-2 rounded-lg"
+      }
+    >
       <ResponsiveContainer width="100%" height={220}>
-        <BarChart data={data} margin={{ top: 10, right: 20, left: 20, bottom: 20 }}>
+        <BarChart
+          data={data.map((d) => ({
+            ...d,
+            _formattedDate: safeFormatDate(d),
+          }))}
+          margin={{ top: 10, right: 20, left: 20, bottom: 40 }}
+        >
           <CartesianGrid stroke={gridStroke} strokeDasharray="3 3" />
-          <XAxis dataKey="month" tick={{ fontSize: 12, fill: tickColor }} stroke="none" angle={-30} textAnchor="end" />
+          <XAxis
+            dataKey="_formattedDate"
+            tick={{ fontSize: 11, fill: tickColor }}
+            stroke="none"
+            angle={-30}
+            textAnchor="end"
+            height={50}
+          />
           <YAxis tick={{ fontSize: 12, fill: tickColor }} stroke="none" />
           <Tooltip content={<CustomToolTip />} />
           <Bar dataKey="amount" radius={[10, 10, 0, 0]}>
-            {data.map((_, i) => (<Cell key={i} fill={COLORS[i % COLORS.length]} />))}
+            {data.map((_, i) => (
+              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+            ))}
           </Bar>
         </BarChart>
       </ResponsiveContainer>
