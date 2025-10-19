@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState, useContext } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
-import { LuMessageCircle, LuSend, LuX } from 'react-icons/lu';
 import { UserContext } from '../../context/UserContext';
 import { useCurrency } from '../../context/CurrencyContext';
+import { LuMessageCircle, LuSend, LuX } from 'react-icons/lu';
 
 // NEW: voice input button (adjust path if your folders differ)
 import MicButton from '../../components/Voice/MicButton';

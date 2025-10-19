@@ -1,46 +1,80 @@
-import React, { useContext } from 'react';
-import { Outlet } from 'react-router-dom';
-import { UserContext } from '../../context/UserContext';
-
-import Navbar from './Navbar';
-import SideMenu from './SideMenu';
-import ChatWidget from '../Chat/ChatWidget';
+import React, { useContext, useState } from "react";
+import { Outlet } from "react-router-dom";
+import { UserContext } from "../../context/UserContext";
+import SideMenu from "./SideMenu";
+import ChatWidget from "../Chat/ChatWidget";
+import { LuMenu } from "react-icons/lu";
 
 export default function DashboardLayout({ children, activeMenu }) {
   const { user, prefs } = useContext(UserContext) || {};
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  // fallback to light if undefined
-  const appTheme = prefs?.theme || 'light';
+  const appTheme = prefs?.theme || "light";
+
+  const bgColor =
+    appTheme === "dark"
+      ? "bg-[#0e1218] text-gray-100"
+      : "bg-[#f9fafb] text-gray-900";
+
+  const sideBg =
+    appTheme === "dark"
+      ? "bg-[#10141a] border-gray-700"
+      : "bg-white border-gray-200";
 
   return (
-    <div
-      className={`min-h-screen flex flex-col ${
-        appTheme === 'dark'
-          ? 'bg-gray-900 text-gray-100'
-          : 'bg-[#fcfbfc] text-gray-900'
-      }`}
-    >
-      {/* Top bar */}
-      <Navbar activeMenu={activeMenu} />
+    <div className={`min-h-screen flex flex-col ${bgColor}`}>
+      {/* Top bar (mobile only) */}
+      <div
+        className={`md:hidden flex items-center justify-between px-4 py-3 border-b ${
+          appTheme === "dark" ? "border-gray-700" : "border-gray-200"
+        }`}
+      >
+        <button
+          onClick={() => setIsMenuOpen(true)}
+          className="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800"
+        >
+          <LuMenu size={22} />
+        </button>
+        <h1 className="text-lg font-semibold">Dashboard</h1>
+      </div>
 
-      {/* Body */}
-      <div className="flex flex-1">
-        {/* Side menu */}
+      {/* Main content area */}
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Sidebar (desktop) */}
         <aside
-          className={`max-[1080px]:hidden w-[260px] shrink-0 border-r ${
-            appTheme === 'dark' ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-          }`}
+          className={`hidden md:block w-[250px] shrink-0 overflow-y-auto
+            scrollbar-thin scrollbar-thumb-gray-500 scrollbar-track-transparent
+            border-r ${sideBg}`}
+          style={{ height: "100vh" }}
         >
           <SideMenu activeMenu={activeMenu} />
         </aside>
 
+        {/* Mobile sidebar (drawer) */}
+        {isMenuOpen && (
+          <div className="fixed inset-0 z-50 flex">
+            <div
+              className={`w-[250px] h-full ${sideBg} overflow-y-auto scrollbar-thin p-0`}
+            >
+              <SideMenu activeMenu={activeMenu} />
+            </div>
+            <div
+              className="flex-1 bg-black/40"
+              onClick={() => setIsMenuOpen(false)}
+            />
+          </div>
+        )}
+
         {/* Main content */}
-        <main className="grow mx-5 my-4">
+        <main
+          className="flex-1 p-5 overflow-y-auto"
+          style={{ height: "100vh" }}
+        >
           {children ?? <Outlet />}
         </main>
       </div>
 
-      {/* Floating chat bubble (left only) */}
+      {/* Floating Chat Widget */}
       {user && <ChatWidget side="left" />}
     </div>
   );

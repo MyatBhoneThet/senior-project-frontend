@@ -33,24 +33,24 @@ const CustomBarChart = ({ data = [] }) => {
   const gridStroke = isDark ? "#3F3F46" : cssVar("--color-primary-100", "#DCFCE7");
   const tickColor = isDark ? "#E5E7EB" : "#334155";
 
-  // ✅ Robust date formatter
+  // Robust date formatter including year in format string
   const safeFormatDate = (entry) => {
-    // Detect valid date key (date, createdAt, transactionDate)
-    const rawDate = entry?.date || entry?.createdAt || entry?.transactionDate;
-    if (!rawDate) return "";
+  const rawDate = entry?.date || entry?.createdAt || entry?.transactionDate;
+  if (!rawDate) return "";
 
-    const parsed = moment(rawDate, [
-      moment.ISO_8601,
-      "YYYY-MM-DD",
-      "YYYY/MM/DD",
-      "DD-MM-YYYY",
-      "D MMM YYYY",
-      "MMM D, YYYY",
-      "YYYY-MM-DDTHH:mm:ss.SSSZ",
-    ]);
+  const parsed = moment(rawDate, [
+    moment.ISO_8601,
+    "YYYY-MM-DD",
+    "YYYY/MM/DD",
+    "DD-MM-YYYY",
+    "D MMM YYYY",
+    "MMM D, YYYY",
+    "YYYY-MM-DDTHH:mm:ss.SSSZ",
+  ]);
 
-    return parsed.isValid() ? parsed.format("MMM D") : "";
-  };
+  return parsed.isValid() ? parsed.format("MMM D") : "";
+};
+
 
   const CustomToolTip = ({ active, payload }) => {
     if (active && payload && payload.length) {

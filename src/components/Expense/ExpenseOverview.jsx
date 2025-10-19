@@ -7,12 +7,14 @@ import moment from "moment";
 
 const ExpenseOverview = ({ transactions, onAddExpense }) => {
   const [chartData, setChartData] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState(moment().month()); // default current month
-  const [selectedYear, setSelectedYear] = useState(moment().year()); // default current year
+  const [selectedMonth, setSelectedMonth] = useState(moment().month());
+  const [selectedYear, setSelectedYear] = useState(moment().year());
   const [yearList, setYearList] = useState([]);
   const [monthDropdownOpen, setMonthDropdownOpen] = useState(false);
   const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
-  const { convert } = useCurrency();
+  const [totalExpense, setTotalExpense] = useState(0);
+
+  const { convert, currencySymbol } = useCurrency();
   const { t, lang } = useT();
   const monthRef = useRef();
   const yearRef = useRef();
@@ -25,8 +27,10 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (monthRef.current && !monthRef.current.contains(e.target)) setMonthDropdownOpen(false);
-      if (yearRef.current && !yearRef.current.contains(e.target)) setYearDropdownOpen(false);
+      if (monthRef.current && !monthRef.current.contains(e.target))
+        setMonthDropdownOpen(false);
+      if (yearRef.current && !yearRef.current.contains(e.target))
+        setYearDropdownOpen(false);
     };
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
@@ -34,7 +38,9 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
 
   // Prepare unique years from transactions
   useEffect(() => {
-    const years = Array.from(new Set(transactions.map(tx => moment(tx.date).year()))).sort((a, b) => b - a);
+    const years = Array.from(
+      new Set(transactions.map((tx) => moment(tx.date).year()))
+    ).sort((a, b) => b - a);
     setYearList(years);
   }, [transactions]);
 
@@ -42,21 +48,25 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
   useEffect(() => {
     if (!transactions || transactions.length === 0) {
       setChartData([]);
+      setTotalExpense(0);
       return;
     }
 
     let filteredTx = [...transactions];
 
     if (selectedMonth !== null) {
-      filteredTx = filteredTx.filter(tx => moment(tx.date).month() === selectedMonth);
+      filteredTx = filteredTx.filter(
+        (tx) => moment(tx.date).month() === selectedMonth
+      );
     }
     if (selectedYear !== null) {
-      filteredTx = filteredTx.filter(tx => moment(tx.date).year() === selectedYear);
+      filteredTx = filteredTx.filter(
+        (tx) => moment(tx.date).year() === selectedYear
+      );
     }
 
-    // Prepare chart data: each point = date, sorted
     const result = filteredTx
-      .map(tx => ({
+      .map((tx) => ({
         date: moment(tx.date).format("YYYY-MM-DD"),
         amount: convert(tx.amount),
         category: tx.category || tx.categoryName || "Uncategorized",
@@ -64,6 +74,10 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
       .sort((a, b) => moment(a.date) - moment(b.date));
 
     setChartData(result);
+
+    // Calculate total expense
+    const total = result.reduce((sum, tx) => sum + tx.amount, 0);
+    setTotalExpense(total);
   }, [transactions, selectedMonth, selectedYear, lang, convert]);
 
   return (
@@ -71,9 +85,14 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
         <div>
-          <h5 className="text-lg font-semibold">{tt("expense.expenseOverview", "Expense Overview")}</h5>
+          <h5 className="text-lg font-semibold">
+            {tt("expense.expenseOverview", "Expense Overview")}
+          </h5>
           <p className="text-xs text-gray-400 mt-0.5">
-            {tt("expense.text", "Track your spending trends over time and gain insights into where your money goes.")}
+            {tt(
+              "expense.text",
+              "Track your spending trends over time and gain insights into where your money goes."
+            )}
           </p>
         </div>
 
@@ -84,14 +103,16 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
               className="px-3 py-1 bg-gray-700 text-white rounded-md"
               onClick={() => setMonthDropdownOpen(!monthDropdownOpen)}
             >
-              {selectedMonth !== null ? moment().month(selectedMonth).format("MMMM") : "Month"}
+              {selectedMonth !== null
+                ? moment().month(selectedMonth).format("MMMM")
+                : "Month"}
             </button>
             {monthDropdownOpen && (
-              <div className="absolute mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-10">
+              <div className="absolute mt-1 bg-gray-700 border border-gray-300 rounded-md shadow-lg z-10">
                 {Array.from({ length: 12 }, (_, i) => (
                   <div
                     key={i}
-                    className="px-3 py-1 cursor-pointer hover:bg-gray-200"
+                    className="px-3 py-1 cursor-pointer hover:bg-gray-500"
                     onClick={() => {
                       setSelectedMonth(i);
                       setMonthDropdownOpen(false);
@@ -101,7 +122,7 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
                   </div>
                 ))}
                 <div
-                  className="px-3 py-1 cursor-pointer hover:bg-gray-200 font-bold text-red-600"
+                  className="px-3 py-1 cursor-pointer hover:bg-gray-500 font-bold text-red-400"
                   onClick={() => {
                     setSelectedMonth(null);
                     setMonthDropdownOpen(false);
@@ -122,11 +143,11 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
               {selectedYear || "Year"}
             </button>
             {yearDropdownOpen && (
-              <div className="absolute mt-1 bg-white border border-gray-300 rounded-md shadow-lg z-10 max-h-60 overflow-auto">
-                {yearList.map(y => (
+              <div className="absolute mt-1 bg-gray-700 border border-gray-300 rounded-md shadow-lg z-10 max-h-60 overflow-auto">
+                {yearList.map((y) => (
                   <div
                     key={y}
-                    className="px-3 py-1 cursor-pointer hover:bg-gray-200"
+                    className="px-3 py-1 cursor-pointer hover:bg-gray-500"
                     onClick={() => {
                       setSelectedYear(y);
                       setYearDropdownOpen(false);
@@ -136,7 +157,7 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
                   </div>
                 ))}
                 <div
-                  className="px-3 py-1 cursor-pointer hover:bg-gray-200 font-bold text-red-600"
+                  className="px-3 py-1 cursor-pointer hover:bg-gray-500 font-bold text-red-400"
                   onClick={() => {
                     setSelectedYear(null);
                     setYearDropdownOpen(false);
@@ -168,6 +189,12 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
               {tt("expense.noData", "No expense data available for this period.")}
             </p>
           )}
+          <span className="text-base text-gray-300 font-medium whitespace-nowrap">
+                {tt("expense.totalExpense", "Total Expense for this period")}
+            </span>
+            <span className="text-xl font-bold text-rose-500 ml-4 whitespace-nowrap">
+                {totalExpense.toLocaleString()} {currencySymbol || "THB"}
+            </span>
         </div>
       </div>
     </div>

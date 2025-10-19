@@ -7,12 +7,14 @@ import moment from "moment";
 
 const IncomeOverview = ({ transactions, onAddIncome }) => {
   const [chartData, setChartData] = useState([]);
-  const [selectedMonth, setSelectedMonth] = useState(moment().month()); // default to current month
-  const [selectedYear, setSelectedYear] = useState(moment().year()); // default to current year
+  const [selectedMonth, setSelectedMonth] = useState(moment().month());
+  const [selectedYear, setSelectedYear] = useState(moment().year());
   const [yearList, setYearList] = useState([]);
   const [monthDropdownOpen, setMonthDropdownOpen] = useState(false);
   const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
-  const { convert } = useCurrency();
+  const [totalIncome, setTotalIncome] = useState(0);
+
+  const { convert, currencySymbol } = useCurrency();
   const { t, lang } = useT();
   const monthRef = useRef();
   const yearRef = useRef();
@@ -24,41 +26,54 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
 
   useEffect(() => {
     const handleClickOutside = (e) => {
-      if (monthRef.current && !monthRef.current.contains(e.target)) setMonthDropdownOpen(false);
-      if (yearRef.current && !yearRef.current.contains(e.target)) setYearDropdownOpen(false);
+      if (monthRef.current && !monthRef.current.contains(e.target))
+        setMonthDropdownOpen(false);
+      if (yearRef.current && !yearRef.current.contains(e.target))
+        setYearDropdownOpen(false);
     };
     document.addEventListener("click", handleClickOutside);
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
   useEffect(() => {
-    const years = Array.from(new Set(transactions.map(tx => moment(tx.date).year()))).sort((a, b) => b - a);
+    const years = Array.from(
+      new Set(transactions.map((tx) => moment(tx.date).year()))
+    ).sort((a, b) => b - a);
     setYearList(years);
   }, [transactions]);
 
   useEffect(() => {
     if (!transactions || transactions.length === 0) {
       setChartData([]);
+      setTotalIncome(0);
       return;
     }
 
     let filteredTx = [...transactions];
 
     if (selectedMonth !== null) {
-      filteredTx = filteredTx.filter(tx => moment(tx.date).month() === selectedMonth);
+      filteredTx = filteredTx.filter(
+        (tx) => moment(tx.date).month() === selectedMonth
+      );
     }
     if (selectedYear !== null) {
-      filteredTx = filteredTx.filter(tx => moment(tx.date).year() === selectedYear);
+      filteredTx = filteredTx.filter(
+        (tx) => moment(tx.date).year() === selectedYear
+      );
     }
 
     const result = filteredTx
-      .map(tx => ({
+      .map((tx) => ({
         date: moment(tx.date).format("YYYY-MM-DD"),
         amount: convert(tx.amount),
       }))
       .sort((a, b) => moment(a.date) - moment(b.date));
 
     setChartData(result);
+
+    // Calculate total income
+    const total = result.reduce((sum, tx) => sum + tx.amount, 0);
+    setTotalIncome(total);
   }, [transactions, selectedMonth, selectedYear, lang, convert]);
 
   return (
@@ -70,7 +85,10 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
             {tt("income.incomeOverview", "Income Overview")}
           </h5>
           <p className="text-xs text-gray-400 mt-0.5">
-            {tt("income.text", "Track your earnings over time and analyze your income trends.")}
+            {tt(
+              "income.text",
+              "Track your earnings over time and analyze your income trends."
+            )}
           </p>
         </div>
 
@@ -81,7 +99,9 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
               className="px-3 py-1 bg-gray-700 text-white rounded-md"
               onClick={() => setMonthDropdownOpen(!monthDropdownOpen)}
             >
-              {selectedMonth !== null ? moment().month(selectedMonth).format("MMMM") : "Month"}
+              {selectedMonth !== null
+                ? moment().month(selectedMonth).format("MMMM")
+                : "Month"}
             </button>
             {monthDropdownOpen && (
               <div className="absolute mt-1 bg-gray-700 border border-gray-300 rounded-md shadow-lg z-10">
@@ -98,7 +118,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
                   </div>
                 ))}
                 <div
-                  className="px-3 py-1 cursor-pointer hover:bg-gray-200 font-bold text-red-600"
+                  className="px-3 py-1 cursor-pointer hover:bg-gray-500 font-bold text-red-400"
                   onClick={() => {
                     setSelectedMonth(null);
                     setMonthDropdownOpen(false);
@@ -120,7 +140,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
             </button>
             {yearDropdownOpen && (
               <div className="absolute mt-1 bg-gray-700 border border-gray-300 rounded-md shadow-lg z-10 max-h-60 overflow-auto">
-                {yearList.map(y => (
+                {yearList.map((y) => (
                   <div
                     key={y}
                     className="px-3 py-1 cursor-pointer hover:bg-gray-500"
@@ -133,7 +153,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
                   </div>
                 ))}
                 <div
-                  className="px-3 py-1 cursor-pointer hover:bg-gray-200 font-bold text-red-600"
+                  className="px-3 py-1 cursor-pointer hover:bg-gray-500 font-bold text-red-400"
                   onClick={() => {
                     setSelectedYear(null);
                     setYearDropdownOpen(false);
@@ -156,15 +176,23 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
       </div>
 
       {/* Chart */}
-      <div className="mt-4">
-        {chartData.length > 0 ? (
-          <CustomBarChart data={chartData} />
-        ) : (
-          <p className="text-center text-sm text-gray-400">
-            {tt("income.noData", "No income data available for this period.")}
-          </p>
-        )}
-      </div>
+<div className="mt-2">
+  {chartData.length > 0 ? (
+    <CustomBarChart data={chartData} />
+  ) : (
+    <p className="text-center text-sm text-gray-400">
+      {tt("income.noData", "No income data available for this period.")}
+    </p>
+  )}
+  {/* Income summary appears just beneath chart */}
+  <span className="text-base text-gray-300 font-medium whitespace-nowrap">
+    {tt("income.totalIncome", "Total Income for this period:")}
+  </span>
+  <span className="text-xl font-bold text-green-500 ml-4 whitespace-nowrap">
+    {totalIncome.toLocaleString()} {currencySymbol || "THB"}
+  </span>
+</div>
+
     </div>
   );
 };
