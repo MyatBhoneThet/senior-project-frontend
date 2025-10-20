@@ -43,8 +43,11 @@ const CustomLineChart = ({ data = [], xDataKey = 'date' }) => {
 
   return (
     <div className={isDark ? 'bg-gray-900 rounded-lg p-2' : 'bg-white rounded-lg p-2'}>
-      <ResponsiveContainer width="100%" height={190}>
-        <AreaChart data={data}>
+      <ResponsiveContainer width="100%" height={170}>
+        <AreaChart 
+          data={data}
+          margin={{ top: 10, right: 10, left: 0, bottom: 5 }}
+        >
           <defs>
             <linearGradient id="areaPrimaryRed" x1="0" y1="0" x2="0" y2="1">
               <stop offset="5%" stopColor={colors.PRIMARY} stopOpacity={0.35} />
@@ -55,19 +58,31 @@ const CustomLineChart = ({ data = [], xDataKey = 'date' }) => {
           <XAxis
             dataKey={xDataKey}
             tickFormatter={(date) => moment(date).format('MMM D')}
-            tick={{ fontSize: 12, fill: tickColor }}
+            tick={{ fontSize: 11, fill: tickColor }}
             stroke="none"
+            height={30}
+            tickMargin={5}
+            interval="preserveStartEnd"
           />
-          <YAxis tick={{ fontSize: 12, fill: tickColor }} stroke="none" />
+          <YAxis 
+            tick={{ fontSize: 11, fill: tickColor }} 
+            stroke="none"
+            width={35}
+            tickFormatter={(value) => {
+              if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
+              if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+              return value;
+            }}
+          />
           <Tooltip content={<CustomTooltip />} />
           <Area
             type="monotone"
             dataKey="amount"
             stroke={colors.PRIMARY}
             fill="url(#areaPrimaryRed)"
-            strokeWidth={3}
-            dot={{ r: 3, fill: colors.P300 }}
-            activeDot={{ r: 4 }}
+            strokeWidth={2}
+            dot={{ r: 2, fill: colors.P300 }}
+            activeDot={{ r: 3 }}
           />
         </AreaChart>
       </ResponsiveContainer>

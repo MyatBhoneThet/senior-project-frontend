@@ -24,7 +24,6 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
     return val && val !== key ? val : fallback;
   };
 
-  // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e) => {
       if (monthRef.current && !monthRef.current.contains(e.target))
@@ -36,7 +35,6 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
     return () => document.removeEventListener("click", handleClickOutside);
   }, []);
 
-  // Prepare unique years from transactions
   useEffect(() => {
     const years = Array.from(
       new Set(transactions.map((tx) => moment(tx.date).year()))
@@ -44,7 +42,6 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
     setYearList(years);
   }, [transactions]);
 
-  // Filter chart data based on selected month/year
   useEffect(() => {
     if (!transactions || transactions.length === 0) {
       setChartData([]);
@@ -75,44 +72,44 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
 
     setChartData(result);
 
-    // Calculate total expense
     const total = result.reduce((sum, tx) => sum + tx.amount, 0);
     setTotalExpense(total);
   }, [transactions, selectedMonth, selectedYear, lang, convert]);
 
   return (
-    <div className="card">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div>
-          <h5 className="text-lg font-semibold">
+    <div className="bg-gray-900 rounded-xl p-4 border border-gray-700">
+      {/* Header Section with Controls on the right */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
+        <div className="flex-1">
+          <h1 className="text-xl font-bold text-white mb-1">
             {tt("expense.expenseOverview", "Expense Overview")}
-          </h5>
-          <p className="text-xs text-gray-400 mt-0.5">
+          </h1>
+          <p className="text-sm text-gray-400">
             {tt(
               "expense.text",
               "Track your spending trends over time and gain insights into where your money goes."
             )}
           </p>
         </div>
-
-        <div className="flex items-center gap-2 relative flex-wrap">
+        
+        {/* Controls Section - Moved to right side */}
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           {/* Month Dropdown */}
-          <div ref={monthRef} className="relative">
+          <div ref={monthRef} className="relative flex-1 sm:flex-none min-w-[80px]">
             <button
-              className="px-3 py-1 bg-gray-700 text-white rounded-md"
+              className="w-full px-2 py-1.5 bg-gray-700 text-white rounded-md text-xs sm:text-sm"
               onClick={() => setMonthDropdownOpen(!monthDropdownOpen)}
             >
               {selectedMonth !== null
-                ? moment().month(selectedMonth).format("MMMM")
+                ? moment().month(selectedMonth).format("MMM")
                 : "Month"}
             </button>
             {monthDropdownOpen && (
-              <div className="absolute mt-1 bg-gray-700 border border-gray-300 rounded-md shadow-lg z-10">
+              <div className="absolute mt-1 bg-gray-700 border border-gray-600 rounded-md shadow-lg z-20 left-0 right-0 sm:left-auto sm:right-0 sm:min-w-[120px] max-h-60 overflow-auto">
                 {Array.from({ length: 12 }, (_, i) => (
                   <div
                     key={i}
-                    className="px-3 py-1 cursor-pointer hover:bg-gray-500"
+                    className="px-3 py-2 cursor-pointer hover:bg-gray-600 text-sm"
                     onClick={() => {
                       setSelectedMonth(i);
                       setMonthDropdownOpen(false);
@@ -122,32 +119,32 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
                   </div>
                 ))}
                 <div
-                  className="px-3 py-1 cursor-pointer hover:bg-gray-500 font-bold text-red-400"
+                  className="px-3 py-2 cursor-pointer hover:bg-gray-600 font-bold text-red-400 text-sm border-t border-gray-600"
                   onClick={() => {
                     setSelectedMonth(null);
                     setMonthDropdownOpen(false);
                   }}
                 >
-                  All Months
+                  All
                 </div>
               </div>
             )}
           </div>
 
           {/* Year Dropdown */}
-          <div ref={yearRef} className="relative">
+          <div ref={yearRef} className="relative flex-1 sm:flex-none min-w-[70px]">
             <button
-              className="px-3 py-1 bg-gray-700 text-white rounded-md"
+              className="w-full px-2 py-1.5 bg-gray-700 text-white rounded-md text-xs sm:text-sm"
               onClick={() => setYearDropdownOpen(!yearDropdownOpen)}
             >
               {selectedYear || "Year"}
             </button>
             {yearDropdownOpen && (
-              <div className="absolute mt-1 bg-gray-700 border border-gray-300 rounded-md shadow-lg z-10 max-h-60 overflow-auto">
+              <div className="absolute mt-1 bg-gray-700 border border-gray-600 rounded-md shadow-lg z-20 left-0 right-0 sm:left-auto sm:right-0 sm:min-w-[90px] max-h-60 overflow-auto">
                 {yearList.map((y) => (
                   <div
                     key={y}
-                    className="px-3 py-1 cursor-pointer hover:bg-gray-500"
+                    className="px-3 py-2 cursor-pointer hover:bg-gray-600 text-sm"
                     onClick={() => {
                       setSelectedYear(y);
                       setYearDropdownOpen(false);
@@ -157,44 +154,59 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
                   </div>
                 ))}
                 <div
-                  className="px-3 py-1 cursor-pointer hover:bg-gray-500 font-bold text-red-400"
+                  className="px-3 py-2 cursor-pointer hover:bg-gray-600 font-bold text-red-400 text-sm border-t border-gray-600"
                   onClick={() => {
                     setSelectedYear(null);
                     setYearDropdownOpen(false);
                   }}
                 >
-                  All Years
+                  All
                 </div>
               </div>
             )}
           </div>
 
           <button
-            className="add-btn flex items-center gap-1 px-3 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white"
+            className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-medium transition-colors flex-1 sm:flex-none"
             onClick={onAddExpense}
           >
-            <LuPlus className="text-lg" />
+            <LuPlus className="text-base" />
             <span>{tt("expense.addExpense", "Add Expense")}</span>
           </button>
         </div>
       </div>
 
-      {/* Chart */}
-      <div className="mt-8 flex justify-end">
-        <div className="w-full h-[250px]">
-          {chartData.length > 0 ? (
-            <CustomLineChart data={chartData} />
-          ) : (
-            <p className="text-center text-sm text-gray-400">
+      {/* Chart Section */}
+      <div className="mb-4">
+        {chartData.length > 0 ? (
+          <div className="bg-gray-800 rounded-lg p-3 border border-gray-700">
+            <div className="h-[200px]">
+              <CustomLineChart data={chartData} />
+            </div>
+          </div>
+        ) : (
+          <div className="bg-gray-800 rounded-lg p-8 border border-gray-700 text-center">
+            <div className="text-gray-400 mb-3">
+              <svg className="w-12 h-12 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+            </div>
+            <p className="text-sm text-gray-400">
               {tt("expense.noData", "No expense data available for this period.")}
             </p>
-          )}
-          <span className="text-base text-gray-300 font-medium whitespace-nowrap">
-                {tt("expense.totalExpense", "Total Expense for this period")}
-            </span>
-            <span className="text-xl font-bold text-rose-500 ml-4 whitespace-nowrap">
-                {totalExpense.toLocaleString()} {currencySymbol || "THB"}
-            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Total Expense Display */}
+      <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-lg p-4 border border-gray-700">
+        <div className="flex flex-col sm:flex-row items-center gap-2">
+          <span className="text-sm text-gray-300 font-medium text-center sm:text-left">
+            Total Expense for this period:
+          </span>
+          <span className="text-xl font-bold text-rose-500 text-center">
+            {totalExpense.toLocaleString()} {currencySymbol}
+          </span>
         </div>
       </div>
     </div>

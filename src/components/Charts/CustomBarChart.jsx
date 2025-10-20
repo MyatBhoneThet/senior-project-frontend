@@ -33,53 +33,34 @@ const CustomBarChart = ({ data = [] }) => {
   const gridStroke = isDark ? "#3F3F46" : cssVar("--color-primary-100", "#DCFCE7");
   const tickColor = isDark ? "#E5E7EB" : "#334155";
 
-  // Robust date formatter including year in format string
   const safeFormatDate = (entry) => {
-  const rawDate = entry?.date || entry?.createdAt || entry?.transactionDate;
-  if (!rawDate) return "";
+    const rawDate = entry?.date || entry?.createdAt || entry?.transactionDate;
+    if (!rawDate) return "";
 
-  const parsed = moment(rawDate, [
-    moment.ISO_8601,
-    "YYYY-MM-DD",
-    "YYYY/MM/DD",
-    "DD-MM-YYYY",
-    "D MMM YYYY",
-    "MMM D, YYYY",
-    "YYYY-MM-DDTHH:mm:ss.SSSZ",
-  ]);
+    const parsed = moment(rawDate, [
+      moment.ISO_8601,
+      "YYYY-MM-DD",
+      "YYYY/MM/DD",
+      "DD-MM-YYYY",
+      "D MMM YYYY",
+      "MMM D, YYYY",
+      "YYYY-MM-DDTHH:mm:ss.SSSZ",
+    ]);
 
-  return parsed.isValid() ? parsed.format("MMM D") : "";
-};
-
+    return parsed.isValid() ? parsed.format("MMM D") : "";
+  };
 
   const CustomToolTip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const p = payload[0]?.payload || {};
       const dateLabel = safeFormatDate(p);
       return (
-        <div
-          className={`shadow-md rounded-lg p-2 border ${
-            isDark
-              ? "bg-gray-800 border-gray-600 text-gray-200"
-              : "bg-white border-gray-300 text-gray-900"
-          }`}
-        >
-          <p
-            className={`text-xs font-semibold mb-1 ${
-              isDark ? "text-green-300" : "text-green-800"
-            }`}
-          >
+        <div className="bg-gray-800 border border-gray-600 rounded-lg p-3 shadow-lg">
+          <p className="text-green-300 font-semibold text-sm mb-1">
             {dateLabel || "Unknown date"}
           </p>
-          <p className={`${isDark ? "text-gray-300" : "text-gray-600"}`}>
-            Amount:{" "}
-            <span
-              className={`${
-                isDark ? "text-white" : "text-gray-900"
-              } font-medium`}
-            >
-              {format(p.amount)}
-            </span>
+          <p className="text-gray-300 text-sm">
+            Amount: <span className="text-white font-medium">{format(p.amount)}</span>
           </p>
         </div>
       );
@@ -87,34 +68,82 @@ const CustomBarChart = ({ data = [] }) => {
     return null;
   };
 
+  // Mobile-first responsive configuration
+  const getChartConfig = () => {
+    const dataLength = data.length;
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    
+    return {
+      margin: { top: 10, right: 5, left: 0, bottom: 5 },
+      xAxisHeight: 30,
+      yAxisWidth: 30,
+      tickFontSize: isMobile ? 9 : 10,
+      barSize: isMobile ? Math.max(12, 25 - dataLength * 0.3) : 20,
+      angle: dataLength > 4 ? -45 : 0,
+      textAnchor: dataLength > 4 ? "end" : "middle",
+      interval: dataLength > 6 ? "preserveStartEnd" : 0
+    };
+  };
+
+  const chartConfig = getChartConfig();
+
   return (
-    <div
-      className={
-        isDark ? "bg-gray-900 mt-2 p-2 rounded-lg" : "bg-white mt-2 p-2 rounded-lg"
-      }
-    >
-      <ResponsiveContainer width="100%" height={220}>
+    <div className="w-full h-full">
+      <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data.map((d) => ({
             ...d,
             _formattedDate: safeFormatDate(d),
           }))}
-          margin={{ top: 10, right: 20, left: 20, bottom: 40 }}
+          margin={chartConfig.margin}
+          barSize={chartConfig.barSize}
+          barGap={2}
         >
-          <CartesianGrid stroke={gridStroke} strokeDasharray="3 3" />
+          <CartesianGrid 
+            stroke={gridStroke} 
+            strokeDasharray="2 2" 
+            vertical={false}
+          />
           <XAxis
             dataKey="_formattedDate"
-            tick={{ fontSize: 11, fill: tickColor }}
+            tick={{ 
+              fontSize: chartConfig.tickFontSize, 
+              fill: tickColor,
+              fontWeight: 500 
+            }}
             stroke="none"
-            angle={-30}
-            textAnchor="end"
-            height={50}
+            angle={chartConfig.angle}
+            textAnchor={chartConfig.textAnchor}
+            height={chartConfig.xAxisHeight}
+            interval={chartConfig.interval}
+            tickMargin={5}
+            minTickGap={1}
           />
-          <YAxis tick={{ fontSize: 12, fill: tickColor }} stroke="none" />
+          <YAxis 
+            tick={{ 
+              fontSize: chartConfig.tickFontSize, 
+              fill: tickColor,
+              fontWeight: 500 
+            }} 
+            stroke="none"
+            width={chartConfig.yAxisWidth}
+            tickFormatter={(value) => {
+              if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
+              return value;
+            }}
+          />
           <Tooltip content={<CustomToolTip />} />
-          <Bar dataKey="amount" radius={[10, 10, 0, 0]}>
+          <Bar 
+            dataKey="amount" 
+            radius={[3, 3, 0, 0]}
+            animationDuration={300}
+          >
             {data.map((_, i) => (
-              <Cell key={i} fill={COLORS[i % COLORS.length]} />
+              <Cell 
+                key={i} 
+                fill={COLORS[i % COLORS.length]}
+                stroke="none"
+              />
             ))}
           </Bar>
         </BarChart>
