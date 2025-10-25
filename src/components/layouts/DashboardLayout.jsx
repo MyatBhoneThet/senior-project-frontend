@@ -1,5 +1,5 @@
 import React, { useContext, useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import { UserContext } from "../../context/UserContext";
 import SideMenu from "./SideMenu";
 import ChatWidget from "../Chat/ChatWidget";
@@ -21,6 +21,24 @@ export default function DashboardLayout({ children, activeMenu }) {
       ? "bg-[#10141a] border-gray-700"
       : "bg-white border-gray-200";
 
+  // Get current path
+  const location = useLocation();
+  const path = location.pathname.split("/").filter(Boolean).pop() || "dashboard";
+
+  // Map path to friendly display names
+  const pageNameMap = {
+    dashboard: "Dashboard",
+    recurring: "Recurring",
+    settings: "Settings",
+    savings: "Savings",
+    expense: "Expense",
+    income: "Income",
+    profile: "Profile",
+    // add more routes here as needed
+  };
+
+  const pageTitle = pageNameMap[path.toLowerCase()] || "Dashboard";
+
   return (
     <div className={`min-h-screen flex flex-col ${bgColor}`}>
       {/* Top bar (mobile only) */}
@@ -35,7 +53,7 @@ export default function DashboardLayout({ children, activeMenu }) {
         >
           <LuMenu size={22} />
         </button>
-        <h1 className="text-lg font-semibold">Dashboard</h1>
+        <h1 className="text-lg font-semibold">{pageTitle}</h1>
       </div>
 
       {/* Main content area */}

@@ -14,8 +14,8 @@ export default function SavingsPage() {
             onClick={() => setTab('goals')}
             className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
               tab === 'goals'
-                ? 'bg-black text-white shadow'
-                : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
+                ? 'bg-black text-white dark:bg-white dark:text-black shadow'
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200'
             }`}
           >
             Goals
@@ -24,14 +24,14 @@ export default function SavingsPage() {
             onClick={() => setTab('jars')}
             className={`px-4 py-2 rounded-xl text-sm font-medium transition ${
               tab === 'jars'
-                ? 'bg-black text-white shadow'
-                : 'bg-gray-100 hover:bg-gray-200 text-gray-800'
+                ? 'bg-black text-white dark:bg-white dark:text-black shadow'
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200'
             }`}
           >
             Jars
           </button>
 
-          <div className="ml-auto hidden md:flex gap-6 text-xs text-gray-500 items-center">
+          <div className="ml-auto hidden md:flex gap-6 text-xs text-gray-500 dark:text-gray-400 items-center">
             <div>
               <b>Jar</b>: sub-wallet of reserved money. Fund/Withdraw doesn’t change past income/expenses.
             </div>

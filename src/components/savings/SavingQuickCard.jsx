@@ -18,15 +18,20 @@ export default function SavingsQuickCard() {
   }, []);
 
   return (
-    <div className="rounded-xl border p-4">
-      <div className="font-semibold">Savings</div>
-      <div className="text-sm text-gray-600 mb-3">Jars & Goals overview</div>
-      <div className="flex gap-6 text-sm">
+    <div className="rounded-xl border p-4 bg-white/90 dark:bg-gray-900/90 dark:border-gray-700 shadow-sm">
+      <div className="font-semibold dark:text-white">Savings</div>
+      <div className="text-sm text-gray-600 dark:text-gray-400 mb-3">Jars & Goals overview</div>
+      <div className="flex gap-6 text-sm dark:text-gray-200">
         <div>Jars: <b>{stats.jars}</b></div>
         <div>Goals: <b>{stats.goals}</b></div>
         <div>Total reserved: <b>THB {stats.total.toLocaleString()}</b></div>
       </div>
-      <Link to="/savings" className="inline-block mt-3 px-3 py-1 rounded bg-black text-white">Open Savings</Link>
+      <Link
+        to="/savings"
+        className="inline-block mt-3 px-3 py-1 rounded bg-black text-white dark:bg-violet-600 hover:dark:bg-violet-700"
+      >
+        Open Savings
+      </Link>
     </div>
   );
 }

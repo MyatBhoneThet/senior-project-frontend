@@ -50,14 +50,24 @@ const CustomBarChart = ({ data = [] }) => {
     return parsed.isValid() ? parsed.format("MMM D") : "";
   };
 
+  // Function to get source/category from data
+  const getSource = (entry) => {
+    return entry?.source || 
+           entry?.category || 
+           entry?.categoryName || 
+           entry?.description || 
+           "Other";
+  };
+
   const CustomToolTip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const p = payload[0]?.payload || {};
-      const dateLabel = safeFormatDate(p);
+      const source = getSource(p);
+      
       return (
         <div className="bg-gray-800 border border-gray-600 rounded-lg p-3 shadow-lg">
           <p className="text-green-300 font-semibold text-sm mb-1">
-            {dateLabel || "Unknown date"}
+            {source}
           </p>
           <p className="text-gray-300 text-sm">
             Amount: <span className="text-white font-medium">{format(p.amount)}</span>
