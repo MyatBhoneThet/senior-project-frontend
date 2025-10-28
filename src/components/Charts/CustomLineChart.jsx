@@ -1,36 +1,68 @@
-import React, { useContext, useMemo } from 'react';
-import { XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Area, AreaChart } from 'recharts';
-import { UserContext } from '../../context/UserContext';
-import { useCurrency } from '../../context/CurrencyContext';
-import moment from 'moment';
+import React, { useContext, useMemo } from "react";
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
+import { UserContext } from "../../context/UserContext";
+import { useCurrency } from "../../context/CurrencyContext";
+import moment from "moment";
 
-const CustomLineChart = ({ data = [], xDataKey = 'date' }) => {
+const cssVar = (name, fallback) => {
+  if (typeof window === "undefined") return fallback;
+  const v = getComputedStyle(document.documentElement).getPropertyValue(name);
+  return (v || "").trim() || fallback;
+};
+
+const CustomLineChart = ({ data = [] }) => {
   const { prefs } = useContext(UserContext);
-  const isDark = prefs?.theme === 'dark';
+  const isDark = prefs?.theme === "dark";
   const { format } = useCurrency();
 
-  const colors = useMemo(() => ({
-    PRIMARY: '#DC2626',
-    P300: '#FCA5A5',
-    P100: '#FEE2E2',
-  }), []);
+  const COLORS = useMemo(() => {
+    // Red color scheme for expenses using CSS variables
+    const PRIMARY = cssVar("--color-rose-500", "#EF4444"); // Red-500
+    const P500 = cssVar("--color-rose-600", "#DC2626");   // Red-600
+    const P100 = cssVar("--color-rose-200", "#FECACA");   // Red-200
+    return { PRIMARY, P500, P100 };
+  }, []);
 
-  const CustomTooltip = ({ active, payload }) => {
+  const gridStroke = isDark ? "#3F3F46" : "#E5E7EB";
+  const tickColor = isDark ? "#E5E7EB" : "#334155";
+
+  // 🔹 Format date safely for x-axis
+  const safeFormatDate = (entry) => {
+    const rawDate = entry?.date || entry?.createdAt || entry?.transactionDate;
+    if (!rawDate) return "";
+    const parsed = moment(rawDate, [
+      moment.ISO_8601,
+      "YYYY-MM-DD",
+      "YYYY/MM/DD",
+      "DD-MM-YYYY",
+      "D MMM YYYY",
+      "MMM D, YYYY",
+      "YYYY-MM-DDTHH:mm:ss.SSSZ",
+    ]);
+    return parsed.isValid() ? parsed.format("MMM D") : "";
+  };
+
+  // 🔹 Custom tooltip with red theme
+  const CustomToolTip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const p = payload[0]?.payload || {};
+      const dateLabel = safeFormatDate(p);
       return (
-        <div
-          className={`shadow-md rounded-lg p-2 border ${
-            isDark
-              ? 'bg-gray-800 border-gray-600 text-gray-200'
-              : 'bg-white border-gray-300 text-gray-900'
-          }`}
-        >
-          <p className={`text-xs font-semibold mb-1 ${isDark ? 'text-red-300' : 'text-red-800'}`}>
-            {moment(p.date).format('MMM DD, YYYY')}
+        <div className="bg-gray-800 border border-gray-600 rounded-lg p-3 shadow-lg">
+          <p className="text-red-400 font-semibold text-sm mb-1">
+            {dateLabel}
           </p>
-          <p className="text-sm">
-            Amount: <span className="text-sm font-medium">{format(p.amount)}</span>
+          <p className="text-gray-300 text-sm">
+            Amount:{" "}
+            <span className="text-white font-medium">{format(p.amount)}</span>
           </p>
         </div>
       );
@@ -38,51 +70,116 @@ const CustomLineChart = ({ data = [], xDataKey = 'date' }) => {
     return null;
   };
 
-  const gridStroke = isDark ? '#3F3F46' : colors.P100;
-  const tickColor = isDark ? '#E5E7EB' : '#334155';
+  // 🔹 Enhanced responsive config
+  const getChartConfig = () => {
+    const dataLength = data.length;
+    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+    
+    let angle = 0;
+    let textAnchor = "middle";
+    let interval = 0;
+    
+    if (dataLength > 8) {
+      angle = -45;
+      textAnchor = "end";
+      interval = "preserveStartEnd";
+    } else if (dataLength > 4) {
+      angle = -30;
+      textAnchor = "end";
+    }
+    
+    return {
+      margin: { top: 15, right: 10, left: 5, bottom: 25 },
+      xAxisHeight: 45,
+      yAxisWidth: 45,
+      tickFontSize: isMobile ? 10 : 12,
+      angle,
+      textAnchor,
+      interval,
+      tickMargin: 10
+    };
+  };
+
+  const chartConfig = getChartConfig();
+
+  const chartData = useMemo(() => {
+    return data.map((d) => ({
+      ...d,
+      _formattedDate: safeFormatDate(d),
+    }));
+  }, [data]);
 
   return (
-    <div className={isDark ? 'bg-gray-900 rounded-lg p-2' : 'bg-white rounded-lg p-2'}>
-      <ResponsiveContainer width="100%" height={170}>
-        <AreaChart 
-          data={data}
-          margin={{ top: 10, right: 10, left: 0, bottom: 5 }}
+    <div className="w-full h-full">
+      <ResponsiveContainer width="100%" height="100%">
+        <AreaChart
+          data={chartData}
+          margin={chartConfig.margin}
         >
           <defs>
-            <linearGradient id="areaPrimaryRed" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor={colors.PRIMARY} stopOpacity={0.35} />
-              <stop offset="95%" stopColor={colors.PRIMARY} stopOpacity={0} />
+            <linearGradient id="areaPrimary" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="5%" stopColor={COLORS.PRIMARY} stopOpacity={0.35} />
+              <stop offset="95%" stopColor={COLORS.PRIMARY} stopOpacity={0} />
             </linearGradient>
           </defs>
-          <CartesianGrid stroke={gridStroke} strokeDasharray="3 3" />
-          <XAxis
-            dataKey={xDataKey}
-            tickFormatter={(date) => moment(date).format('MMM D')}
-            tick={{ fontSize: 11, fill: tickColor }}
-            stroke="none"
-            height={30}
-            tickMargin={5}
-            interval="preserveStartEnd"
+
+          <CartesianGrid
+            stroke={gridStroke}
+            strokeDasharray="2 2"
+            vertical={false}
           />
-          <YAxis 
-            tick={{ fontSize: 11, fill: tickColor }} 
+
+          <XAxis
+            dataKey="_formattedDate"
+            tick={{
+              fontSize: chartConfig.tickFontSize,
+              fill: tickColor,
+              fontWeight: 500,
+            }}
             stroke="none"
-            width={35}
+            angle={chartConfig.angle}
+            textAnchor={chartConfig.textAnchor}
+            height={chartConfig.xAxisHeight}
+            interval={chartConfig.interval}
+            tickMargin={chartConfig.tickMargin}
+            minTickGap={2}
+          />
+
+          <YAxis
+            tick={{
+              fontSize: chartConfig.tickFontSize,
+              fill: tickColor,
+              fontWeight: 500,
+            }}
+            stroke="none"
+            width={chartConfig.yAxisWidth}
             tickFormatter={(value) => {
-              if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
               if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+              if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
               return value;
             }}
           />
-          <Tooltip content={<CustomTooltip />} />
+
+          <Tooltip content={<CustomToolTip />} />
+
           <Area
             type="monotone"
             dataKey="amount"
-            stroke={colors.PRIMARY}
-            fill="url(#areaPrimaryRed)"
+            stroke={COLORS.PRIMARY}
+            fill="url(#areaPrimary)"
             strokeWidth={2}
-            dot={{ r: 2, fill: colors.P300 }}
-            activeDot={{ r: 3 }}
+            dot={{ 
+              r: 3, 
+              fill: COLORS.P500,
+              stroke: isDark ? "#1F2937" : "#FFFFFF",
+              strokeWidth: 1 
+            }}
+            activeDot={{ 
+              r: 5,
+              fill: COLORS.P500,
+              stroke: isDark ? "#1F2937" : "#FFFFFF",
+              strokeWidth: 2
+            }}
           />
         </AreaChart>
       </ResponsiveContainer>
