@@ -11,12 +11,12 @@ export default {
     recentExpense: "Recent Expense",
     expenses: "Expenses",
     income: "Incomes",
-     incomeSources: "Income Sources",
+    incomeSources: "Income Sources",
     download: "Download",
     delete: "Delete",
     seeMore: "See More",
-
   },
+
   settings: {
     title: "Settings",
     language: "Language",
@@ -26,29 +26,37 @@ export default {
     save: "Save",
     english: "English",
     thai: "Thai",
-    burmese: "Burmese"
+    burmese: "Burmese",
   },
-    menu: {
+
+  menu: {
     dashboard: "Dashboard",
     income: "Income",
     expense: "Expense",
     settings: "Settings",
     logout: "Log out",
-    recurring: "Recurring"
-  }
-    , income: {
+    recurring: "Recurring",
+    savings: "Savings",
+    jars: "Jars",
+  },
+
+  income: {
     incomeOverview: "Income Overview",
     addIncome: "Add Income",
     incomeSources: "Income Sources",
     download: "Download",
+    delete: "Delete",
   },
-    expense: {
-        expenseOverview: "Expense Overview",
+
+  expense: {
+    expenseOverview: "Expense Overview",
     addExpense: "Add Expense",
     expenseSources: "Expense Sources",
     download: "Download",
+    delete: "Delete",
   },
-  profile:{
+
+  profile: {
     title: "Profile",
     name: "Name",
     namePlaceholder: "Enter your name",
@@ -63,17 +71,20 @@ export default {
     uploadPhoto: "Upload Photo",
     changePhoto: "Change Photo",
     removePhoto: "Remove Photo",
-    helperText: "Choose a clear image that represents you. Must be in JPG, PNG, or GIF format.",
+    helperText:
+      "Choose a clear image that represents you. Must be in JPG, PNG, or GIF format.",
     saveButton: "Save Profile",
     saving: "Saving...",
     updateSuccess: "Profile updated successfully",
     updateFail: "Failed to update profile",
     fetchError: "Failed to fetch profile",
     uploadFail: "Failed to upload photo",
-    uploadFailAlert: "Failed to upload photo. However, your profile can still be saved.",
+    uploadFailAlert:
+      "Failed to upload photo. However, your profile can still be saved.",
     removeFail: "Failed to remove photo",
   },
-  recurring:{
+
+  recurring: {
     title: "Recurring",
     text: "Create rules for salary, rent, etc.",
     recurringTransactions: "Recurring Transactions",
@@ -104,4 +115,39 @@ export default {
     active: "Active",
     loading: "Loading...",
   },
-}
+
+  // 🟢 NEW SECTION: Savings Dashboard
+  savings: {
+    title: "Savings Dashboard",
+    text: "Manage your jars, track your savings, and stay on top of your financial goals.",
+    quickOverview: "Quick Overview",
+    totalSaved: "Total Saved",
+    goalProgress: "Goal Progress",
+    createNewJar: "Create New Jar",
+    noJarsYet: "No jars yet",
+    savingGoal: "Saving Goal",
+    savedAmount: "Saved Amount",
+    targetAmount: "Target Amount",
+    remaining: "Remaining",
+    deleteJar: "Delete Jar",
+    confirmDelete: "Are you sure you want to delete this jar?",
+  },
+
+  // 🟣 NEW SECTION: Jar Management
+  jar: {
+    title: "Your Jars",
+    addJar: "Add Jar",
+    name: "Jar Name",
+    namePlaceholder: "Enter jar name (e.g., Vacation, Emergency Fund)",
+    goalAmount: "Goal Amount",
+    goalAmountPlaceholder: "Enter goal amount",
+    currentAmount: "Current Amount",
+    progress: "Progress",
+    targetReached: "Target Reached",
+    updateJar: "Update Jar",
+    deleteJar: "Delete Jar",
+    confirmDelete: "Are you sure you want to delete this jar?",
+    save: "Save",
+    cancel: "Cancel",
+  },
+};

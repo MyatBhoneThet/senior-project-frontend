@@ -5,11 +5,12 @@ import { useCurrency } from '../../context/CurrencyContext';
 import { toast } from 'react-hot-toast';
 import { LuTarget, LuTrash2, LuCalendarClock, LuPiggyBank, LuPlus } from 'react-icons/lu';
 import { UserContext } from '../../context/UserContext';
+import useT from '../../hooks/useT';
 
 export default function GoalList() {
   const { prefs } = useContext(UserContext);
   const isDark = prefs?.theme === 'dark';
-
+  const { t } = useT();
   const [goals, setGoals] = useState([]);
   const [jars, setJars] = useState([]);
 
@@ -22,6 +23,11 @@ export default function GoalList() {
   const [aaValue, setAaValue] = useState('10');
 
   const { format } = useCurrency();
+
+  const tt = (key, fallback) => {
+    const val = t?.(key);
+    return val && val !== key ? val : fallback;
+  };
 
   const jarMap = useMemo(() => {
     const m = {};
@@ -116,19 +122,19 @@ export default function GoalList() {
       <form onSubmit={create} className={`rounded-2xl border p-4 shadow-sm ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className={`text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Goal title</label>
-            <input className={inputClass} value={title} onChange={e=>setTitle(e.target.value)} placeholder="e.g., Buy MacBook" />
+            <label className={`text-xs font-semibold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{tt('saving.title','Goal title')}</label>
+            <input className={`${inputClass} placeholder-gray-400`} value={title} onChange={e=>setTitle(e.target.value)} placeholder="e.g., Buy MacBook" />
           </div>
           <div>
-            <label className={`text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Target amount (THB)</label>
-            <input className={inputClass} value={targetAmount} onChange={e=>setTargetAmount(e.target.value)} placeholder="35000" />
+            <label className={`text-xs font-semibold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{tt('saving.amount','Target amount (THB)')}</label>
+            <input className={`${inputClass} placeholder-gray-400`} value={targetAmount} onChange={e=>setTargetAmount(e.target.value)} placeholder="35000" />
           </div>
           <div>
-            <label className={`text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Target date</label>
+            <label className={`text-xs font-semibold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{tt('saving.date','Target date')}</label>
             <input className={inputClass} type="date" value={targetDate} onChange={e=>setTargetDate(e.target.value)} />
           </div>
           <div>
-            <label className={`text-xs font-semibold ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Jar</label>
+            <label className={`text-xs font-semibold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{tt('saving.jar','Jar')}</label>
             <select className={inputClass} value={jarId} onChange={e=>setJarId(e.target.value)}>
               {jars.map(j => <option key={j._id} value={j._id}>{j.name}</option>)}
             </select>
@@ -137,22 +143,22 @@ export default function GoalList() {
           <div className={`md:col-span-2 p-3 flex flex-wrap items-center gap-3 rounded-xl ${isDark ? 'bg-gray-800' : 'bg-gray-50'}`}>
             <label className="flex items-center gap-2">
               <input type="checkbox" checked={aaEnabled} onChange={e=>setAaEnabled(e.target.checked)} />
-              <span className={`text-sm ${isDark ? 'text-gray-300' : ''}`}>Enable auto-allocate on income</span>
+              <span className={`text-sm ${isDark ? 'text-gray-300' : ''}`}>{tt('saving.autoAllocate','Enable auto-allocate on income')}</span>
             </label>
             <select className={`border rounded-lg px-2 py-1 text-sm ${isDark ? 'bg-gray-700 border-gray-600 text-gray-100' : ''}`} value={aaType} onChange={e=>setAaType(e.target.value)}>
-              <option value="percent">Percent</option>
-              <option value="fixed">Fixed</option>
+              <option value="percent">{tt('saving.percent','Percent')}</option>
+              <option value="fixed">{tt('saving.fixed','Fixed')}</option>
             </select>
             <input className={`border rounded-lg px-2 py-1 text-sm ${isDark ? 'bg-gray-700 border-gray-600 text-gray-100' : ''}`} value={aaValue} onChange={e=>setAaValue(e.target.value)} placeholder={aaType === 'percent' ? '10 (%)' : '1000 (THB)'} />
             <span className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-              Auto-allocation moves a portion of each income into this goal’s jar.
+              {tt('saving.goalText2','Auto-allocation moves a portion of each income into this goal’s jar.')}
             </span>
           </div>
         </div>
 
         <div className="mt-4">
           <button className="px-4 py-2 rounded-xl bg-violet-600 text-white shadow hover:bg-violet-700 flex items-center gap-2">
-            <LuPlus /> Create goal
+            <LuPlus /> {tt('saving.createGoal','Create goal')}
           </button>
         </div>
       </form>
@@ -179,7 +185,7 @@ export default function GoalList() {
                       <span className="inline-flex items-center gap-1"><LuCalendarClock /> {new Date(g.targetDate).toLocaleDateString()}</span>
                       {g.status === 'achieved' && (
                         <span className={`ml-2 px-2 py-0.5 rounded text-[11px] ${isDark ? 'bg-green-900 text-green-300' : 'bg-green-100 text-green-700'}`}>
-                          Achieved
+                          {tt('saving.achieved','Achieved')}
                         </span>
                       )}
                     </div>
@@ -194,7 +200,7 @@ export default function GoalList() {
                 </button>
               </div>
 
-              <div className={`mt-3 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Progress</div>
+              <div className={`mt-3 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{tt('saving.progress','Progress')}</div>
               <div className={`text-sm font-medium ${isDark ? 'text-gray-200' : ''}`}>
                 {format(saved)} <span className={`text-gray-500 ${isDark ? 'text-gray-400' : ''}`}>of</span> {format(target)} • {pct}%
               </div>
@@ -203,9 +209,9 @@ export default function GoalList() {
               </div>
 
               <div className="mt-4 flex flex-wrap gap-2">
-                <button onClick={() => fund(g._id, 500)} className={btnClass('bg-green-600','bg-green-700')}>Fund ฿500</button>
+                <button onClick={() => fund(g._id, 500)} className={btnClass('bg-green-600','bg-green-700')}>{tt('saving.fund500','Fund ฿500')}</button>
                 <button onClick={() => autoAlloc(2000)} className={btnClass('bg-indigo-600','bg-indigo-700')} title="Simulate income allocation (e.g., 10% of ฿2000 → jar)">
-                  Test Auto-Allocate (฿2000)
+                  {tt('saving.testAutoAllocate','Test Auto-Allocate (฿2000)')}
                 </button>
               </div>
             </div>
@@ -213,7 +219,7 @@ export default function GoalList() {
         })}
         {goals.length === 0 && (
           <div className={`col-span-full text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-            No goals yet. Create one above.
+            {tt('saving.noGoal','No goals yet. Create one above.')}
           </div>
         )}
       </div>

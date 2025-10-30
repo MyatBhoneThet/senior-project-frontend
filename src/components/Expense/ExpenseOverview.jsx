@@ -23,7 +23,10 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
   const monthRef = useRef();
   const yearRef = useRef();
 
-  const tt = (key, fallback) => t?.(key) || fallback;
+  const tt = (key, fallback) => {
+  const val = t?.(key);
+  return val && val !== key ? val : fallback;
+};
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -85,14 +88,11 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
             {tt("expense.expenseOverview", "Expense Overview")}
           </h1>
           <p className={`text-sm ${isDark ? "text-gray-400" : "text-gray-600"}`}>
-            {tt(
-              "expense.text",
-              "Track your spending trends over time and gain insights into where your money goes."
-            )}
+            {tt("expense.text","Track your spending trends over time and gain insights into where your money goes.")}
           </p>
         </div>
 
-        {/* Controls */}
+        {/* Controls Section */}
         <div className="flex items-center gap-2 w-full sm:w-auto">
           {/* Month Dropdown */}
           <div ref={monthRef} className="relative flex-1 sm:flex-none min-w-[80px]">
@@ -232,7 +232,7 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
       >
         <div className="flex flex-col sm:flex-row items-center gap-2">
           <span className={`text-sm font-medium ${isDark ? "text-gray-300" : "text-gray-700"}`}>
-            Total Expense for this period:
+            {tt('expense.totalExpense','Total Expense for this period:')}
           </span>
           <span className="text-xl font-bold text-rose-500 text-center">
             {totalExpense.toLocaleString()} {currencySymbol}

@@ -97,15 +97,8 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
           >
             {tt("income.incomeOverview", "Income Overview")}
           </h1>
-          <p
-            className={`text-sm ${
-              isDark ? "text-gray-400" : "text-gray-500"
-            }`}
-          >
-            {tt(
-              "income.text",
-              "Track your earnings over time and analyze your income trends."
-            )}
+          <p className={`text-sm ${isDark ? "text-gray-400" : "text-gray-500" }`}>
+            {tt("income.text","Track your earnings over time and analyze your income trends.")}
           </p>
         </div>
 
@@ -289,7 +282,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
               isDark ? "text-gray-300" : "text-gray-600"
             }`}
           >
-            Total Income for this period:
+            {tt('income.totalIncome','Total Income for this period:')}
           </span>
           <span className="text-xl font-bold text-green-500 text-center">
             {totalIncome.toLocaleString()} {currencySymbol}

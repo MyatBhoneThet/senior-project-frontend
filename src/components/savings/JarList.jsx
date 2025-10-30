@@ -5,10 +5,12 @@ import { useCurrency } from '../../context/CurrencyContext';
 import { toast } from 'react-hot-toast';
 import { LuTrash2, LuWallet, LuArrowDown, LuArrowUp } from 'react-icons/lu';
 import { UserContext } from '../../context/UserContext';
+import useT from '../../hooks/useT';
 
 export default function JarList() {
   const { prefs } = useContext(UserContext);
   const isDark = prefs?.theme === 'dark';
+  const { t } = useT();
 
   const [jars, setJars] = useState([]);
   const [name, setName] = useState('');
@@ -19,6 +21,11 @@ export default function JarList() {
   const load = async () => {
     const { data } = await axiosInstance.get(API_PATHS.JARS.BASE);
     setJars(Array.isArray(data) ? data : []);
+  };
+
+  const tt = (key, fallback) => {
+    const val = t?.(key);
+    return val && val !== key ? val : fallback;
   };
 
   useEffect(() => { load(); }, []);
@@ -99,9 +106,9 @@ export default function JarList() {
       <form onSubmit={createJar} className={`rounded-2xl border p-4 shadow-sm backdrop-blur ${isDark ? 'bg-gray-900/90 border-gray-700' : 'bg-white/90 border-gray-300'}`}>
         <div className="flex gap-3 items-end flex-wrap">
           <div className="flex-1 min-w-[240px]">
-            <label className={`text-xs font-semibold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>New Jar Name</label>
+            <label className={`text-xs font-semibold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{tt('saving.newJarName','New Jar Name')}</label>
             <input
-              className={inputClass}
+              className={`${inputClass} placeholder:text-gray-400`}
               value={name}
               onChange={e => setName(e.target.value)}
               placeholder="e.g., Emergency Fund"
@@ -111,7 +118,7 @@ export default function JarList() {
             className={`px-4 py-2 rounded-xl bg-violet-600 text-white shadow hover:bg-violet-700 disabled:opacity-60`}
             disabled={creating || !name.trim()}
           >
-            {creating ? 'Adding…' : 'Add Jar'}
+            {tt('saving.addJar',`{creating ? 'Adding…' : 'Add Jar'}`)}
           </button>
         </div>
       </form>
@@ -128,7 +135,7 @@ export default function JarList() {
                   <div className={`p-2 rounded-xl ${isDark ? 'bg-violet-900/30 text-violet-400' : 'bg-violet-50 text-violet-700'}`}><LuWallet /></div>
                   <div>
                     <div className={`font-semibold ${isDark ? 'text-white' : ''}`}>{j.name}</div>
-                    <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>Jar</div>
+                    <div className={`text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{tt('saving.jar','Jar')}</div>
                   </div>
                 </div>
                 <button
@@ -144,12 +151,12 @@ export default function JarList() {
                 </button>
               </div>
 
-              <div className={`mt-3 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>Balance</div>
+              <div className={`mt-3 text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{tt('saving.balance','Balance')}</div>
               <div className={`text-xl font-semibold ${isDark ? 'text-white' : ''}`}>{format(balance)}</div>
 
               <div className="mt-4 flex gap-2 items-end">
                 <div className="flex-1">
-                  <label className={`text-xs font-semibold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>Amount (THB)</label>
+                  <label className={`text-xs font-semibold ${isDark ? 'text-gray-300' : 'text-gray-600'}`}>{tt('saving.amount','Amount (THB)')}</label>
                   <input
                     className={inputClass}
                     value={amt}
@@ -158,10 +165,10 @@ export default function JarList() {
                   />
                 </div>
                 <button onClick={() => fund(j._id)} className={btnClass('bg-green-600','bg-green-700') } title="Move from free cash → jar">
-                  <LuArrowUp /> Fund
+                  <LuArrowUp /> {tt('saving.fund','Fund')}
                 </button>
                 <button onClick={() => withdraw(j._id)} className={btnClass('bg-amber-600','bg-amber-700')} title="Move from jar → free cash">
-                  <LuArrowDown /> Withdraw
+                  <LuArrowDown /> {tt('saving.withdraw','Withdraw')}
                 </button>
               </div>
             </div>

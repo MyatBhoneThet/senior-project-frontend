@@ -5,7 +5,7 @@ import ExpenseList from "../../components/Expense/ExpenseList";
 import Modal from "../../components/layouts/Modal";
 import AddExpenseForm from "../../components/Expense/AddExpenseForm";
 import DeleteAlert from "../../components/layouts/DeleteAlert";
-import { bulkDeleteExpense } from "../../components/Expense/bulkDeleteExpense";
+import  BulkDeleteExpense  from "../../components/Expense/bulkDeleteExpense";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import { toast } from "react-toastify";
@@ -13,11 +13,13 @@ import { useUserAuth } from "../../hooks/useUserAuth";
 import { syncRecurring } from "../../utils/syncRecurring";
 import FilterControl from "../../components/common/FilterControl";
 import { UserContext } from "../../context/UserContext";
+import useT from "../../hooks/useT";
 
 const Expense = () => {
   useUserAuth();
   const { prefs } = useContext(UserContext);
   const isDarkTheme = prefs?.theme === "dark";
+  const { t, lang } = useT();
 
   const [expenseData, setExpenseData] = useState([]);
   const [filteredExpense, setFilteredExpense] = useState([]);
@@ -29,9 +31,13 @@ const Expense = () => {
 
   const [openDeleteAlert, setOpenDeleteAlert] = useState({ show: false, data: null });
   const [openBulkDeleteModal, setOpenBulkDeleteModal] = useState(false);
-  const [bulkDeletePeriod, setBulkDeletePeriod] = useState("all");
 
   const mounted = useRef(true);
+
+  const tt = (key, fallback) => {
+    const val = t?.(key);
+    return val && val !== key ? val : fallback;
+  };
 
   /** Fetch all expense details */
   const fetchExpenseDetails = async () => {
@@ -55,10 +61,9 @@ const Expense = () => {
   /** Add Expense */
   const handleAddExpense = async (expense) => {
     const { source, categoryId, categoryName, amount, date, icon } = expense;
-
-    if (!amount || isNaN(amount) || Number(amount) <= 0)
-      return toast.error("Amount must be greater than 0.");
-    if (!date) return toast.error("Date is required.");
+    if (!source?.trim()) return toast.error(tt('expense.text1','Source is required.'));
+    if (!amount || isNaN(amount) || Number(amount) <= 0) return toast.error(tt('expense.text2','Amount must be greater than 0.'));
+    if (!date) return toast.error(tt('expense.text3','Date is required.'));
 
     try {
       await axiosInstance.post(API_PATHS.EXPENSE.ADD_EXPENSE, {
@@ -72,11 +77,11 @@ const Expense = () => {
 
       await syncRecurring({ silent: false });
       setOpenAddExpenseModal(false);
-      toast.success("Expense added successfully.");
+      toast.success(tt('expense.text4',"Expense added successfully."));
       fetchExpenseDetails();
     } catch (error) {
       console.error(error?.response?.data || error);
-      toast.error(error?.response?.data?.message || "Something went wrong.");
+      toast.error(error?.response?.data?.message || tt('expense.text5','Something went wrong.'));
     }
   };
 
@@ -95,11 +100,11 @@ const Expense = () => {
 
       setOpenEditExpenseModal(false);
       setSelectedExpense(null);
-      toast.success("Expense updated successfully.");
+      toast.success(tt('expense.text6','Expense updated successfully.'));
       fetchExpenseDetails();
     } catch (error) {
       console.error(error?.response?.data || error);
-      toast.error(error?.response?.data?.message || "Update failed.");
+      toast.error(error?.response?.data?.message || tt('expense.text7',"Update failed."));
     }
   };
 
@@ -109,24 +114,24 @@ const Expense = () => {
       await axiosInstance.delete(API_PATHS.EXPENSE.DELETE_EXPENSE(id));
       await syncRecurring({ silent: false });
       setOpenDeleteAlert({ show: false, data: null });
-      toast.success("Expense deleted successfully.");
+      toast.success(tt('expense.text8',"Expense deleted successfully."));
       fetchExpenseDetails();
     } catch (error) {
       console.error(error?.response?.data || error);
-      toast.error(error?.response?.data?.message || "Something went wrong.");
+      toast.error(error?.response?.data?.message || (tt('expense.text5',"Something went wrong.")));
     }
   };
 
   /** Bulk Delete Expenses */
-  const handleBulkDelete = async () => {
+  const handleBulkDelete = async (period) => {
     try {
-      const data = await bulkDeleteExpense(bulkDeletePeriod);
+      const data = await BulkDeleteExpense(period);
       setOpenBulkDeleteModal(false);
-      toast.success(data.message || "Expenses deleted successfully.");
+      toast.success(data.message || tt('expense.text8',"Expense deleted successfully."));
       fetchExpenseDetails();
     } catch (error) {
       console.error(error);
-      toast.error(error.message || "Bulk delete failed.");
+      toast.error(error.message || tt('expense.text5','Something went wrong.'));
     }
   };
 
@@ -146,7 +151,7 @@ const Expense = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error(error);
-      toast.error("Something went wrong while downloading.");
+      toast.error(tt('expense.text9','Something went wrong while downloading.'));
     }
   };
 
@@ -187,7 +192,7 @@ const Expense = () => {
               onClick={() => setOpenBulkDeleteModal(true)}
               className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
             >
-              Bulk Delete
+              {tt('expense.bulkDelete','Bulk Delete')}
             </button>
             <FilterControl
               items={expenseData}
@@ -198,7 +203,7 @@ const Expense = () => {
                 text: "source",
               }}
               onChange={(list) => setFilteredExpense(list)}
-              label="Filter"
+              label={tt('expense.filter',"Filter")}
             />
           </div>
 
@@ -256,96 +261,12 @@ const Expense = () => {
           onClose={() => setOpenBulkDeleteModal(false)}
           title="Bulk Delete Expenses"
         >
-          <div
-            className={`space-y-6 p-6 rounded-xl transition-all duration-300 ${
-              isDarkTheme
-                ? "bg-gray-800 border border-gray-700 text-gray-200"
-                : "bg-gradient-to-br from-slate-50 to-slate-100 text-gray-900"
-            }`}
-          >
-            <div className="bg-gradient-to-r from-amber-500 to-orange-500 rounded-xl p-4 shadow-lg">
-              <h3 className="text-sm font-bold text-white">⚠️ Warning</h3>
-              <p className="text-sm text-white/95 mt-1">
-                This action cannot be undone. Deleted expenses will be
-                permanently removed.
-              </p>
-            </div>
-
-            <p className="font-bold text-lg">Select deletion period:</p>
-            <div className="space-y-3">
-              {[
-                { label: "Last Month", value: "last-month", color: "blue" },
-                { label: "Last 6 Months", value: "last-6-months", color: "indigo" },
-                { label: "Last Year", value: "last-year", color: "purple" },
-                { label: "All Expenses", value: "all", color: "red" },
-              ].map(({ label, value, color }) => (
-                <label
-                  key={value}
-                  className={`group flex items-center space-x-4 p-4 rounded-xl cursor-pointer transition-all duration-200 ${
-                    bulkDeletePeriod === value
-                      ? `bg-gradient-to-r from-${color}-500 to-${color}-600 shadow-lg scale-[1.02]`
-                      : isDarkTheme
-                      ? "bg-gray-700 border border-gray-600 hover:bg-gray-600"
-                      : "bg-white border-2 border-slate-200 hover:shadow-lg hover:scale-[1.01]"
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="period"
-                    value={value}
-                    checked={bulkDeletePeriod === value}
-                    onChange={(e) => setBulkDeletePeriod(e.target.value)}
-                    className="w-5 h-5 accent-current focus:ring-2 focus:ring-offset-2"
-                  />
-                  <span
-                    className={`font-bold ${
-                      bulkDeletePeriod === value ? "text-white" : ""
-                    }`}
-                  >
-                    {label}
-                  </span>
-                  {bulkDeletePeriod === value && (
-                    <svg
-                      className="w-6 h-6 text-white ml-auto"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M5 13l4 4L19 7"
-                      />
-                    </svg>
-                  )}
-                </label>
-              ))}
-            </div>
-
-            <div className="flex justify-end gap-3 pt-4 border-t border-gray-300 dark:border-gray-600">
-              <button
-                onClick={() => setOpenBulkDeleteModal(false)}
-                className={`px-6 py-2 rounded-lg font-semibold transition-all duration-200 ${
-                  isDarkTheme
-                    ? "bg-gray-600 hover:bg-gray-700 text-white"
-                    : "bg-slate-600 hover:bg-slate-700 text-white"
-                }`}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleBulkDelete}
-                className={`px-6 py-2 rounded-lg font-semibold transition-all duration-200 ${
-                  isDarkTheme
-                    ? "bg-red-600 hover:bg-red-700 text-white"
-                    : "bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 text-white"
-                }`}
-              >
-                Delete Selected
-              </button>
-            </div>
-          </div>
+          <BulkDeleteExpense
+            isOpen={openBulkDeleteModal}
+            onClose={() => setOpenBulkDeleteModal(false)}
+            onConfirm={handleBulkDelete}
+            isDarkTheme={isDarkTheme}
+          />
         </Modal>
       </div>
     </DashboardLayout>

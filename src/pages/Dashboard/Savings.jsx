@@ -2,9 +2,15 @@ import React, { useState } from 'react';
 import DashboardLayout from '../../components/layouts/DashboardLayout';
 import JarList from '../../components/savings/JarList';
 import GoalList from '../../components/savings/GoalList';
+import useT from '../../hooks/useT';
 
 export default function SavingsPage() {
   const [tab, setTab] = useState('goals');
+  const { t } = useT();
+  const tt = (key, fallback) => {
+    const val = t?.(key);
+    return val && val !== key ? val : fallback;
+  };
 
   return (
     <DashboardLayout activeMenu="Savings">
@@ -18,7 +24,7 @@ export default function SavingsPage() {
                 : 'bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200'
             }`}
           >
-            Goals
+            {tt('saving.goal',"Goals")}
           </button>
           <button
             onClick={() => setTab('jars')}
@@ -28,15 +34,15 @@ export default function SavingsPage() {
                 : 'bg-gray-100 hover:bg-gray-200 text-gray-800 dark:bg-gray-800 dark:hover:bg-gray-700 dark:text-gray-200'
             }`}
           >
-            Jars
+            {tt('saving.jar','Jars')}
           </button>
 
           <div className="ml-auto hidden md:flex gap-6 text-xs text-gray-500 dark:text-gray-400 items-center">
             <div>
-              <b>Jar</b>: sub-wallet of reserved money. Fund/Withdraw doesn’t change past income/expenses.
+              <b>{tt('saving.jar','Jar')}</b>{tt('saving.jarText',': sub-wallet of reserved money. Fund/Withdraw doesn’t change past income/expenses.')}
             </div>
             <div>
-              <b>Goal</b>: target amount + date, linked to a jar. Auto-allocate can move a % or fixed THB from each income.
+              <b>{tt('saving.goal','Goal')}</b>{tt('saving.goalText1',': target amount + date, linked to a jar. Auto-allocate can move a % or fixed THB from each income.')}
             </div>
           </div>
         </div>

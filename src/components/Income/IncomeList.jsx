@@ -40,7 +40,7 @@ const IncomeList = ({ transactions = [], onDelete, onDownload, onEdit }) => {
             amount={income.amount}
             type="income"
             onDelete={() => onDelete?.(income._id)}
-            onEdit={() => onEdit?.(income)}             // ← NEW
+            onEdit={() => onEdit?.(income)}
           />
         ))}
 
