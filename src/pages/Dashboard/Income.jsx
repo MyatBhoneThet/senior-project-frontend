@@ -5,7 +5,7 @@ import IncomeList from '../../components/Income/IncomeList';
 import Modal from '../../components/layouts/Modal';
 import AddIncomeForm from '../../components/Income/AddIncomeForm';
 import DeleteAlert from '../../components/layouts/DeleteAlert'; 
-import BulkDeleteIncome from '../../components/Income/BulkDeleteIncome';
+import BulkDeleteIncome from '../../components/Income/bulkDeleteIncome';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
 import { toast } from 'react-toastify';
