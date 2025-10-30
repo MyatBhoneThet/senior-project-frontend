@@ -5,7 +5,7 @@ import ExpenseList from "../../components/Expense/ExpenseList";
 import Modal from "../../components/layouts/Modal";
 import AddExpenseForm from "../../components/Expense/AddExpenseForm";
 import DeleteAlert from "../../components/layouts/DeleteAlert";
-import  BulkDeleteExpense  from "../../components/Expense/bulkDeleteExpense";
+import BulkDeleteExpense from "../../components/Expense/bulkDeleteExpense";
 import axiosInstance from "../../utils/axiosInstance";
 import { API_PATHS } from "../../utils/apiPaths";
 import { toast } from "react-toastify";
@@ -19,7 +19,7 @@ const Expense = () => {
   useUserAuth();
   const { prefs } = useContext(UserContext);
   const isDarkTheme = prefs?.theme === "dark";
-  const { t, lang } = useT();
+  const { t } = useT();
 
   const [expenseData, setExpenseData] = useState([]);
   const [filteredExpense, setFilteredExpense] = useState([]);

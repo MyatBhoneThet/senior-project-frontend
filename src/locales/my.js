@@ -194,7 +194,8 @@ export default {
     deleteDesc: "အကောင့်ကို အပြီးတိုင် ဖျက်ရန် \"DELETE\" ဟု ရိုက်ထည့်ပါ",
     deletePlaceholder: "အတည်ပြုရန် DELETE ဟု ရိုက်ပါ",
     deleteBtn: "အကောင့် ဖျက်ရန်",
-    deleting: "ဖျက်နေသည်..."
+    deleting: "ဖျက်နေသည်...",
+    delete: "ဖျက်မည်"
   },
   profile: {
     title: "ကိုယ်ရေးအကျဉ်း",

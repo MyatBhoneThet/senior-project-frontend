@@ -70,6 +70,8 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
       .map((tx) => ({
         date: moment(tx.date).format("YYYY-MM-DD"),
         amount: convert(tx.amount),
+        category: tx.category || tx.categoryName || "Uncategorized",
+        source: tx.source || "Income", // Make sure source is included for tooltip
       }))
       .sort((a, b) => moment(a.date) - moment(b.date));
 
@@ -145,8 +147,8 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
                 <div
                   className={`px-3 py-2 cursor-pointer font-bold text-sm border-t ${
                     isDark
-                      ? "hover:bg-gray-600 text-red-400 border-gray-600"
-                      : "hover:bg-gray-100 text-red-500 border-gray-200"
+                      ? "hover:bg-gray-600 text-green-400 border-gray-600"
+                      : "hover:bg-gray-100 text-green-500 border-gray-200"
                   }`}
                   onClick={() => {
                     setSelectedMonth(null);
@@ -198,8 +200,8 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
                 <div
                   className={`px-3 py-2 cursor-pointer font-bold text-sm border-t ${
                     isDark
-                      ? "hover:bg-gray-600 text-red-400 border-gray-600"
-                      : "hover:bg-gray-100 text-red-500 border-gray-200"
+                      ? "hover:bg-gray-600 text-green-400 border-gray-600"
+                      : "hover:bg-gray-100 text-green-500 border-gray-200"
                   }`}
                   onClick={() => {
                     setSelectedYear(null);

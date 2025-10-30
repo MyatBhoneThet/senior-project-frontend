@@ -24,9 +24,9 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
   const yearRef = useRef();
 
   const tt = (key, fallback) => {
-  const val = t?.(key);
-  return val && val !== key ? val : fallback;
-};
+    const val = t?.(key);
+    return val && val !== key ? val : fallback;
+  };
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -66,6 +66,7 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
         date: moment(tx.date).format("YYYY-MM-DD"),
         amount: convert(tx.amount),
         category: tx.category || tx.categoryName || "Uncategorized",
+        source: tx.source || "Expense", // Make sure source is included for tooltip
       }))
       .sort((a, b) => moment(a.date) - moment(b.date));
 

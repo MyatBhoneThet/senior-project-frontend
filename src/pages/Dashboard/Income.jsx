@@ -4,7 +4,7 @@ import IncomeOverview from '../../components/Income/IncomeOverview';
 import IncomeList from '../../components/Income/IncomeList';
 import Modal from '../../components/layouts/Modal';
 import AddIncomeForm from '../../components/Income/AddIncomeForm';
-import DeleteAlert from '../../components/layouts/DeleteAlert'; 
+import DeleteAlert from '../../components/layouts/DeleteAlert';
 import BulkDeleteIncome from '../../components/Income/bulkDeleteIncome';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
@@ -208,7 +208,7 @@ const Income = () => {
           />
         </Modal>
 
-        {/* Delete Single */}
+        {/* Delete Income(single) */}
         <Modal
           isOpen={openDeleteAlert.show}
           onClose={() => setOpenDeleteAlert({ show: false, data: null })}

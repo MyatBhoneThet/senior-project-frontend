@@ -1,20 +1,37 @@
-import React from 'react';
+import React, { useContext } from 'react';
+import { UserContext } from '../../context/UserContext';
 
 const Modal = ({ isOpen, onClose, title, children }) => {
+  const { prefs } = useContext(UserContext);
+  const isDark = prefs?.theme === 'dark';
+  
   if (!isOpen) return null;
-
-  // ✅ minimal change: higher z-index so it can't hide behind charts/layouts
+  
   return (
     <div className="fixed top-0 right-0 left-0 z-[9999] flex justify-center items-center w-full h-[calc(100%-1rem)] max-h-full overflow-y-auto overflow-x-hidden bg-black/60">
       <div className="relative p-4 w-full max-w-2xl max-h-full">
-        <div className="relative bg-white rounded-lg shadow-lg border border-gray-200 dark:bg-gray-700">
-          <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-b rounded-t dark:border-gray-600 border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
+        <div className={`relative rounded-lg shadow-lg border ${
+          isDark 
+            ? 'bg-gray-800 border-gray-700' 
+            : 'bg-white border-gray-200'
+        }`}>
+          <div className={`flex items-center justify-between p-4 md:p-5 border-b rounded-t ${
+            isDark 
+              ? 'border-gray-700' 
+              : 'border-gray-200'
+          }`}>
+            <h3 className={`text-lg font-medium ${
+              isDark ? 'text-white' : 'text-gray-900'
+            }`}>
               {title}
             </h3>
             <button 
               type="button"
-              className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 inline-flex items-center justify-center dark:hover:bg-gray-600 dark:hover:text-white cursor-pointer"
+              className={`bg-transparent rounded-lg text-sm w-8 h-8 inline-flex items-center justify-center cursor-pointer ${
+                isDark
+                  ? 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                  : 'text-gray-400 hover:bg-gray-200 hover:text-gray-900'
+              }`}
               onClick={onClose}
             >
               <svg
@@ -34,7 +51,9 @@ const Modal = ({ isOpen, onClose, title, children }) => {
               </svg>
             </button>
           </div>
-          <div className="p-4 md:p-5 space-y-4">
+          <div className={`p-4 md:p-5 space-y-4 ${
+            isDark ? 'text-gray-200' : 'text-gray-900'
+          }`}>
             {children}
           </div>
         </div>

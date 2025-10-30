@@ -193,6 +193,7 @@ export default {
       deletePlaceholder: "พิมพ์ DELETE เพื่อยืนยัน",
       deleteBtn: "ลบบัญชี",
       deleting: "กำลังลบ...",
+      delete: "ลบ"
     },
     profile: {
         title: "โปรไฟล์",

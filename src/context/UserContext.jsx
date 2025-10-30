@@ -28,7 +28,9 @@ export default function UserProvider({ children }) {
     try {
       const saved = localStorage.getItem('appSettings');
       if (saved) setPrefs((p) => ({ ...p, ...JSON.parse(saved) }));
-    } catch {}
+    } catch {
+        // ignore
+    }
 
     const token = localStorage.getItem('token');
     if (!token) return;

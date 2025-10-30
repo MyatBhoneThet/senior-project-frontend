@@ -1,6 +1,14 @@
 import React from 'react';
+import useT from '../../hooks/useT';
 
 const DeleteAlert = ({ content, onDelete}) => {
+    const { t } = useT();
+
+    const tt = (key, fallback) => {
+    const val = t?.(key);
+    return val && val !== key ? val : fallback;
+  };
+
     return (
         <div>
             <p className ="text-sm">{content}</p>
@@ -8,10 +16,10 @@ const DeleteAlert = ({ content, onDelete}) => {
             <div className ="flex justify-end mt-6">
                 <button
                     type="button"
-                    className ="add-btn add-btn-fill"
+                    className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700"
                     onClick = {onDelete}
                 >
-                    Delete
+                    {tt('settings.delete','Delete')}
                 </button>
             </div>
         </div>

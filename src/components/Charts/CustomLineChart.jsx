@@ -50,20 +50,26 @@ const CustomLineChart = ({ data = [] }) => {
     return parsed.isValid() ? parsed.format("MMM D") : "";
   };
 
-  // 🔹 Custom tooltip with red theme
+  // 🔹 Custom tooltip with transaction title/source
   const CustomToolTip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const p = payload[0]?.payload || {};
-      const dateLabel = safeFormatDate(p);
+      const transactionTitle = p.source || p.title || "Expense";
       return (
         <div className="bg-gray-800 border border-gray-600 rounded-lg p-3 shadow-lg">
           <p className="text-red-400 font-semibold text-sm mb-1">
-            {dateLabel}
+            {transactionTitle}
           </p>
           <p className="text-gray-300 text-sm">
             Amount:{" "}
             <span className="text-white font-medium">{format(p.amount)}</span>
           </p>
+          {p.category && p.category !== "Uncategorized" && (
+            <p className="text-gray-300 text-sm mt-1">
+              Category:{" "}
+              <span className="text-white font-medium">{p.category}</span>
+            </p>
+          )}
         </div>
       );
     }

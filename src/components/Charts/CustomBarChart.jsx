@@ -50,28 +50,26 @@ const CustomBarChart = ({ data = [] }) => {
     return parsed.isValid() ? parsed.format("MMM D") : "";
   };
 
-  // Function to get source/category from data
-  const getSource = (entry) => {
-    return entry?.source || 
-           entry?.category || 
-           entry?.categoryName || 
-           entry?.description || 
-           "Other";
-  };
-
+  // 🔹 Custom tooltip with transaction title/source (like expense chart)
   const CustomToolTip = ({ active, payload }) => {
     if (active && payload && payload.length) {
       const p = payload[0]?.payload || {};
-      const source = getSource(p);
-      
+      const transactionTitle = p.source || p.title || "Income";
       return (
         <div className="bg-gray-800 border border-gray-600 rounded-lg p-3 shadow-lg">
-          <p className="text-green-300 font-semibold text-sm mb-1">
-            {source}
+          <p className="text-green-400 font-semibold text-sm mb-1">
+            {transactionTitle}
           </p>
           <p className="text-gray-300 text-sm">
-            Amount: <span className="text-white font-medium">{format(p.amount)}</span>
+            Amount:{" "}
+            <span className="text-white font-medium">{format(p.amount)}</span>
           </p>
+          {p.category && p.category !== "Uncategorized" && (
+            <p className="text-gray-300 text-sm mt-1">
+              Category:{" "}
+              <span className="text-white font-medium">{p.category}</span>
+            </p>
+          )}
         </div>
       );
     }
@@ -97,14 +95,18 @@ const CustomBarChart = ({ data = [] }) => {
 
   const chartConfig = getChartConfig();
 
+  const chartData = useMemo(() => {
+    return data.map((d) => ({
+      ...d,
+      _formattedDate: safeFormatDate(d),
+    }));
+  }, [data]);
+
   return (
     <div className="w-full h-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
-          data={data.map((d) => ({
-            ...d,
-            _formattedDate: safeFormatDate(d),
-          }))}
+          data={chartData}
           margin={chartConfig.margin}
           barSize={chartConfig.barSize}
           barGap={2}
@@ -138,6 +140,7 @@ const CustomBarChart = ({ data = [] }) => {
             stroke="none"
             width={chartConfig.yAxisWidth}
             tickFormatter={(value) => {
+              if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
               if (value >= 1000) return `${(value / 1000).toFixed(0)}k`;
               return value;
             }}
