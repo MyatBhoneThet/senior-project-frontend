@@ -4,7 +4,7 @@ import { LuArrowRight } from 'react-icons/lu';
 import moment from 'moment';
 import useT from '../../hooks/useT';
 
-const RecentIncome = ({ transactions, onSeeMore }) => {
+const RecentIncome = ({ transactions, onSeeMore, isDark }) => {
   const { t } = useT();
 
   // translate with fallback if key missing
@@ -13,8 +13,10 @@ const RecentIncome = ({ transactions, onSeeMore }) => {
     return s && s !== key ? s : fallback;
   };
 
+  const hasTransactions = transactions && transactions.length > 0;
+
   return (
-    <div className="card">
+    <div className="card flex flex-col justify-between h-full">
       <div className="flex items-center justify-between">
         <h5 className="text-lg">{tt('dashboard.income', 'Incomes')}</h5>
 
@@ -23,21 +25,53 @@ const RecentIncome = ({ transactions, onSeeMore }) => {
         </button>
       </div>
 
-      <div className="mt-6">
-  {transactions?.slice(0, 3)?.map((item, index) => (
-    <TransactionInfoCard
-      key={item._id}
-      title={item.source}
-      icon={item.icon}
-      date={moment(item.date).format('Do MMM YYYY')}
-      amount={item.amount}
-      type="income"
-      hideDeleteBtn
-      className={index > 0 ? 'mt-2' : ''} // spacing between cards
-    />
-  ))}
-</div>
-
+      <div className="mt-4 flex-1">
+        {hasTransactions ? (
+          transactions.slice(0, 3).map((item, index) => (
+            <TransactionInfoCard
+              key={item._id}
+              title={item.source}
+              icon={item.icon}
+              date={moment(item.date).format('Do MMM YYYY')}
+              amount={item.amount}
+              type="income"
+              hideDeleteBtn
+              className={index > 0 ? 'mt-2' : ''}
+            />
+          ))
+        ) : (
+          <div className="flex items-center justify-center h-full">
+            <div
+              className={`text-center ${
+                isDark ? 'text-gray-400' : 'text-gray-500'
+              }`}
+            >
+              <div className="mb-3">
+                {/* History icon */}
+                <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className={`w-12 h-12 mx-auto ${
+                        isDark ? "text-gray-500" : "text-gray-400"
+                    }`}
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M12 8v4l3 3m6-3a9 9 0 11-9-9 9 9 0 019 9zM12 3v3m0 12v3m9-9h-3M6 12H3"
+                    />
+                </svg>
+              </div>
+              <p className="text-sm">
+                {tt('dashboard.noIncomeData', 'No income history yet.')}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -50,7 +50,7 @@ const Home = () => {
 
   return (
     <DashboardLayout activeMenu="Dashboard">
-      <div className={`${appTheme === 'dark' ? 'bg-gray-900 text-gray-100' : 'bg-gray-50 text-gray-900'} min-h-screen my-5 mx-auto`}>
+      <div className={`${appTheme === 'dark' ? 'text-gray-100' : 'bg-gray-50 text-gray-900'} min-h-screen my-5 mx-auto`}>
         {/* Top summary cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <InfoCard

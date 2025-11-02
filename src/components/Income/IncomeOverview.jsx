@@ -224,14 +224,13 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
         </div>
       </div>
 
-      {/* Chart Section */}
-      <div className="mb-4">
+      {/* Chart */}
+      <div
+        className="mb-4">
         {chartData.length > 0 ? (
           <div
             className={`rounded-lg p-3 border ${
-              isDark
-                ? "bg-gray-800 border-gray-700"
-                : "bg-gray-50 border-gray-200"
+            isDark ? "bg-gray-800 border-gray-700": "bg-gray-50 border-gray-200"
             }`}
           >
             <div className="h-[200px]">
@@ -264,7 +263,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
               </svg>
             </div>
             <p className="text-sm">
-              {tt("income.noData", "No income data available for this period.")}
+              {tt("income.noData", "No income data available for this month.")}
             </p>
           </div>
         )}

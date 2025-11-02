@@ -32,7 +32,7 @@ const CustomPieChart = ({ data = [], label, colors, totalAmount }) => {
   return (
     <div className={`${containerBg} p-2 rounded-lg relative -mt-1`}>
       {/* Use negative margin to lift chart */}
-      <ResponsiveContainer width="100%" height={280}>
+      <ResponsiveContainer width="100%" height={265}>
         <PieChart>
           <Pie
             data={data}
