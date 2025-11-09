@@ -1,5 +1,6 @@
 import {
     LuLayoutDashboard,
+    LuChartNoAxesCombined,
     LuLayoutGrid,
     LuHandCoins,
     LuWalletMinimal,
@@ -16,6 +17,12 @@ export const SIDE_MENU_DATA = [
         label: "Dashboard",
         icon: LuLayoutDashboard,
         path: "/dashboard",
+    },
+    {
+        id: "07",
+        label: "Statistics",
+        icon: LuChartNoAxesCombined,
+        path: "/statistics",
     },
     {
         id: "02",
@@ -47,5 +54,4 @@ export const SIDE_MENU_DATA = [
         icon: LuLogOut,
         path: "/logout",
     },
-    
 ]

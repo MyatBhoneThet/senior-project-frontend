@@ -37,6 +37,7 @@ export default function SideMenu() {
   const pathToI18nKey = (path) => {
     switch (path) {
       case "/dashboard": return "menu.dashboard";
+      case "/statistics": return "menu.statistics";
       case "/income": return "menu.income";
       case "/expense": return "menu.expense";
       case "/settings": return "menu.settings";

@@ -6,6 +6,14 @@ import { useCurrency } from "../../context/CurrencyContext";
 import { UserContext } from "../../context/UserContext";
 import moment from "moment";
 
+const currencySymbols = {
+  USD: '$',
+  THB: '฿',
+  EUR: '€',
+  MMK: 'K',
+  GBP: '£',
+};
+
 const IncomeOverview = ({ transactions, onAddIncome }) => {
   const [chartData, setChartData] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(moment().month());
@@ -15,10 +23,12 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
   const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
   const [totalIncome, setTotalIncome] = useState(0);
 
-  const { convert, currencySymbol } = useCurrency();
-  const { t, lang } = useT();
+  const { convert } = useCurrency();
   const { prefs } = useContext(UserContext);
+  const currencySymbol = currencySymbols[prefs?.currency] || '฿';
   const isDark = prefs?.theme === "dark";
+
+  const { t, lang } = useT();
 
   const monthRef = useRef();
   const yearRef = useRef();
@@ -71,7 +81,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
         date: moment(tx.date).format("YYYY-MM-DD"),
         amount: convert(tx.amount),
         category: tx.category || tx.categoryName || "Uncategorized",
-        source: tx.source || "Income", // Make sure source is included for tooltip
+        source: tx.source || "Income",
       }))
       .sort((a, b) => moment(a.date) - moment(b.date));
 
@@ -118,7 +128,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
             >
               {selectedMonth !== null
                 ? moment().month(selectedMonth).format("MMM")
-                : "Month"}
+                : tt("income.month", "Month")}
             </button>
             {monthDropdownOpen && (
               <div
@@ -155,7 +165,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
                     setMonthDropdownOpen(false);
                   }}
                 >
-                  All
+                  {tt("income.all", "All")}
                 </div>
               </div>
             )}
@@ -171,7 +181,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
               }`}
               onClick={() => setYearDropdownOpen(!yearDropdownOpen)}
             >
-              {selectedYear || "Year"}
+              {selectedYear || tt("income.year", "Year")}
             </button>
             {yearDropdownOpen && (
               <div
@@ -208,7 +218,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
                     setYearDropdownOpen(false);
                   }}
                 >
-                  All
+                  {tt("income.all", "All")}
                 </div>
               </div>
             )}
@@ -225,8 +235,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
       </div>
 
       {/* Chart */}
-      <div
-        className="mb-4">
+      <div className="mb-4">
         {chartData.length > 0 ? (
           <div
             className={`rounded-lg p-3 border ${
@@ -234,7 +243,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
             }`}
           >
             <div className="h-[200px]">
-              <CustomBarChart data={chartData} />
+              <CustomBarChart data={chartData} currencySymbol={currencySymbol} />
             </div>
           </div>
         ) : (
@@ -286,7 +295,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
             {tt('income.totalIncome','Total Income for this period:')}
           </span>
           <span className="text-xl font-bold text-green-500 text-center">
-            {totalIncome.toLocaleString()} {currencySymbol}
+            {totalIncome.toLocaleString()}{currencySymbol}
           </span>
         </div>
       </div>

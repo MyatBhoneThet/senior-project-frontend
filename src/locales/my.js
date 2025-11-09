@@ -1,3 +1,5 @@
+import Last60DaysIncomes from "../components/Dashboard/Last60DaysIncomes";
+
 export default {
     menu: {
     dashboard: "ဒက်ရှ်ဘုတ်",
@@ -14,13 +16,23 @@ export default {
     totalBalance: "စုစုပေါင်းလက်ကျန်",
     totalIncome: "စုစုပေါင်းဝင်ငွေ",
     totalExpenses: "စုစုပေါင်းကုန်ကျစရိတ်",
+    thisMonth: "ဤလ",
+    viewDetail: "အသေးစိတ်ကြည့်မည်",
+    addIncome: "ဝင်ငွေ ထည့်ပါ",
+    addExpense: "အသုံးစရိတ် ထည့်ပါ",
+    savings: "ချွေတာငွေ",
+    jars: "စုဗူးများ",
+    goals: "ရည်မှန်းချက်များ",
+    totalReserved: "စုစုပေါင်း သီးသန့်ငွေ",
+    openSavings: "ချွေတာငွေ ဖွင့်မည်",
+    jarsGoalsOverview: "စုဗူးအကျဉ်းချုပ်",
     recentTransactions: "လွန်ခဲ့သည့်ငွေလွှဲစာရင်းများ",
-    last60DaysIncome: "နောက်ဆုံးရက် 60 ဝင်ငွေ",
+    last60DaysIncomes: "နောက်ဆုံးရက် 60 ဝင်ငွေများ",
     last30DaysExpenses: "နောက်ဆုံးရက် 30 ကုန်ကျစရိတ်",
     recentIncome: "လွန်ခဲ့သောဝင်ငွေ",
     recentExpense: "လွန်ခဲ့သောကုန်ကျစရိတ်",
     income: "ဝင်ငွေ",
-    expenses: "အသုံးစရိတ်",
+    expense: "အသုံးစရိတ်",
     seeMore: "ပိုမိုကြည့်ရှုရန်",
   },
   recurring: {

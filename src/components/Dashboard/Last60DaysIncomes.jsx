@@ -7,13 +7,13 @@ const currencySymbols = {
   USD: '$',
   THB: '฿',
   EUR: '€',
-  MMK: 'Ks',
+  MMK: 'K',
   GBP: '£',
 };
 
 const COLORS = ["#875CF5", "#FA2C37", "#FF6900", "#4f39f6"];
 
-const RecentIncomeWithChart = ({ data, totalIncome, isDark }) => {
+const Last60DaysIncomes = ({ data, totalIncome, isDark }) => {
   const { prefs } = useContext(UserContext);
   const currencySymbol = currencySymbols[prefs?.currency] || '';
   const { t } = useT();
@@ -68,13 +68,13 @@ const RecentIncomeWithChart = ({ data, totalIncome, isDark }) => {
   return (
     <div className="card">
       <div className="flex items-center justify-between mb-4">
-        <h5 className="text-lg">{tt('dashboard.last60DaysIncome', 'Last 60 Days Income')}</h5>
+        <h5 className="text-lg">{tt('dashboard.last60DaysIncomes', 'Last 60 Days Incomes')}</h5>
       </div>
 
       <CustomPieChart
         data={chartData}
         label={tt('dashboard.totalIncome', 'Total Income')}
-        totalAmount={`${currencySymbol}${totalIncome}`}
+        totalAmount={`${totalIncome}${currencySymbol}`}
         showTextAnchor
         colors={COLORS}
       />
@@ -82,4 +82,4 @@ const RecentIncomeWithChart = ({ data, totalIncome, isDark }) => {
   );
 };
 
-export default RecentIncomeWithChart;
+export default Last60DaysIncomes;

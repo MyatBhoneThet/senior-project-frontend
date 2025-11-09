@@ -4,7 +4,7 @@ import TransactionInfoCard from "../Cards/TransactionInfoCard";
 import moment from "moment";
 import useT from "../../hooks/useT";
 
-const ExpenseTransactions = ({ transactions, onSeeMore, isDark }) => {
+const RecentExpense = ({ transactions, onSeeMore, isDark }) => {
   const { t } = useT();
 
   const tt = (key, fallback) => {
@@ -17,7 +17,7 @@ const ExpenseTransactions = ({ transactions, onSeeMore, isDark }) => {
   return (
     <div className="card flex flex-col justify-between h-full">
       <div className="flex items-center justify-between">
-        <h5 className="text-lg">{tt("dashboard.expenses", "Expenses")}</h5>
+        <h5 className="text-lg">{tt("dashboard.expense", "Expenses")}</h5>
 
         <button className="card-btn" onClick={onSeeMore}>
           {tt("dashboard.seeMore", "See More")}{" "}
@@ -77,4 +77,4 @@ const ExpenseTransactions = ({ transactions, onSeeMore, isDark }) => {
   );
 };
 
-export default ExpenseTransactions;
+export default RecentExpense;

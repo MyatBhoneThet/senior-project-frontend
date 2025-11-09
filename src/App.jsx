@@ -1,10 +1,10 @@
-// src/App.jsx
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 
 import Login from './pages/Auth/Login';
 import SignUp from './pages/Auth/SignUp';
 import Home from './pages/Dashboard/Home';
+import Statistics from './pages/Dashboard/Statistics';
 import Income from './pages/Dashboard/Income';
 import Expense from './pages/Dashboard/Expense';
 import Settings from './pages/Dashboard/Settings';
@@ -50,6 +50,13 @@ const App = () => {
               </ProtectedRoute>
             }
           />
+          <Route
+            path="/statistics"
+            element={
+              <ProtectedRoute>
+                <Statistics />
+              </ProtectedRoute>
+            } />
           <Route
             path="/income"
             element={

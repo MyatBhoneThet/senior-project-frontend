@@ -28,6 +28,7 @@ export default function DashboardLayout({ children, activeMenu }) {
   // Map path to friendly display names
   const pageNameMap = {
     dashboard: "Dashboard",
+    statistics: "Statistics",
     recurring: "Recurring",
     settings: "Settings",
     savings: "Savings",
