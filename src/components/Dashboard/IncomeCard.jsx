@@ -59,10 +59,7 @@ const IncomeCard = ({ thisMonthIncome, format }) => {
         <h2 className={`text-lg ${isDark ? 'text-gray-300' : 'text-gray-500'}`}>
           {tt("dashboard.income", "Income")}
         </h2>
-        <button
-          onClick={() => navigate('/income')}
-          className="p-2 rounded-full transition-colors hover:bg-gray-700 dark:hover:bg-gray-200/10"
-        >
+        <button onClick={() => navigate('/income')} className="p-2 rounded-full transition-colors hover:bg-gray-700 dark:hover:bg-gray-200/10">
           <LuWalletMinimal className="text-green-500" size={24} />
         </button>
       </div>
@@ -73,27 +70,17 @@ const IncomeCard = ({ thisMonthIncome, format }) => {
       </p>
 
       <div className="mt-15 flex gap-3">
-        <button
-          onClick={() => navigate('/income')}
-          className="w-1/3 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition"
-        >
+        <button onClick={() => navigate('/income')} className="w-1/3 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition">
           {tt("dashboard.viewDetail", "View")}
         </button>
 
-        <button
-          onClick={() => setOpenAddIncomeModal(true)}
-          className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-1"
-        >
+        <button onClick={() => setOpenAddIncomeModal(true)} className="flex-1 bg-green-600 text-white py-2 rounded-lg hover:bg-green-700 transition flex items-center justify-center gap-1">
           <span>{tt("dashboard.addIncome", "Add Income")}</span>
           <LuChevronRight className="text-green-200" size={18} />
         </button>
       </div>
 
-      <Modal
-        isOpen={openAddIncomeModal}
-        onClose={() => setOpenAddIncomeModal(false)}
-        title={tt('income.addNewIncome', 'Add New Income')}
-      >
+      <Modal isOpen={openAddIncomeModal} onClose={() => setOpenAddIncomeModal(false)} title={tt('income.addNewIncome', 'Add New Income')}>
         <AddIncomeForm onAddIncome={handleAddIncome} mode="add" />
       </Modal>
     </div>

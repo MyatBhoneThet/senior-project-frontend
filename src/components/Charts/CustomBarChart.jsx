@@ -10,7 +10,6 @@ import {
   Cell,
 } from "recharts";
 import { UserContext } from "../../context/UserContext";
-import { useCurrency } from "../../context/CurrencyContext";
 import moment from "moment";
 
 const cssVar = (name, fallback) => {
@@ -19,10 +18,9 @@ const cssVar = (name, fallback) => {
   return (v || "").trim() || fallback;
 };
 
-const CustomBarChart = ({ data = [] }) => {
+const CustomBarChart = ({ data = [], currencySymbol = '฿' }) => {
   const { prefs } = useContext(UserContext);
   const isDark = prefs?.theme === "dark";
-  const { format } = useCurrency();
 
   const COLORS = useMemo(() => {
     const PRIMARY = cssVar("--color-primary", "#16A34A");
@@ -62,7 +60,12 @@ const CustomBarChart = ({ data = [] }) => {
           </p>
           <p className="text-gray-300 text-sm">
             Amount:{" "}
-            <span className="text-white font-medium">{format(p.amount)}</span>
+            <span className="text-white font-medium">
+              {typeof p.amount === 'number' ? p.amount.toLocaleString(undefined, {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              }) : '0.00'}{currencySymbol}
+            </span>
           </p>
           {p.category && p.category !== "Uncategorized" && (
             <p className="text-gray-300 text-sm mt-1">

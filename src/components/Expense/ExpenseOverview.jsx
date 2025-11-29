@@ -22,16 +22,13 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
   const [monthDropdownOpen, setMonthDropdownOpen] = useState(false);
   const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
   const [totalExpense, setTotalExpense] = useState(0);
-
   const { convert } = useCurrency();
   const { prefs } = useContext(UserContext);
   const currencySymbol = currencySymbols[prefs?.currency] || '฿';
   const isDark = prefs?.theme === "dark";
-  const { t, lang } = useT();
-
   const monthRef = useRef();
   const yearRef = useRef();
-
+  const { t, lang } = useT();
   const tt = (key, fallback) => {
     const val = t?.(key);
     return val && val !== key ? val : fallback;
@@ -125,16 +122,7 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
                 }`}
               >
                 {Array.from({ length: 12 }, (_, i) => (
-                  <div
-                    key={i}
-                    className={`px-3 py-2 cursor-pointer text-sm ${
-                      isDark ? "hover:bg-gray-600 text-gray-100" : "hover:bg-gray-100 text-gray-700"
-                    }`}
-                    onClick={() => {
-                      setSelectedMonth(i);
-                      setMonthDropdownOpen(false);
-                    }}
-                  >
+                  <div key={i} className={`px-3 py-2 cursor-pointer text-sm ${isDark ? "hover:bg-gray-600 text-gray-100" : "hover:bg-gray-100 text-gray-700"}`} onClick={() => {setSelectedMonth(i);setMonthDropdownOpen(false);}}>
                     {moment().month(i).format("MMMM")}
                   </div>
                 ))}
@@ -205,10 +193,7 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
           </div>
 
           {/* Add Button */}
-          <button
-            className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-medium transition-colors flex-1 sm:flex-none"
-            onClick={onAddExpense}
-          >
+          <button className="flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-xs sm:text-sm font-medium transition-colors flex-1 sm:flex-none" onClick={onAddExpense}>
             <LuPlus className="text-base" />
             <span>{tt("expense.addExpense", "Add Expense")}</span>
           </button>
@@ -226,18 +211,8 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
         ) : (
           <div className={`rounded-lg p-8 border text-center ${isDark ? "bg-gray-800 border-gray-700 text-gray-400" : "bg-gray-50 border-gray-200 text-gray-500"}`}>
             <div className="mb-3">
-              <svg
-                className={`w-12 h-12 mx-auto ${isDark ? "text-gray-500" : "text-gray-400"}`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1.5}
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                />
+              <svg className={`w-12 h-12 mx-auto ${isDark ? "text-gray-500" : "text-gray-400"}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
               </svg>
             </div>
             <p className={`text-center text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}>

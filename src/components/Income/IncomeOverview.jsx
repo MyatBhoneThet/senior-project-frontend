@@ -10,7 +10,7 @@ const currencySymbols = {
   USD: '$',
   THB: '฿',
   EUR: '€',
-  MMK: 'K',
+  MMK: 'Ks',
   GBP: '£',
 };
 
