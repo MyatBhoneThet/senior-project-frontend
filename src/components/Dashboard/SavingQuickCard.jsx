@@ -4,10 +4,12 @@ import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
 import { UserContext } from '../../context/UserContext';
 import useT from '../../hooks/useT';
+import { useCurrency } from '../../context/CurrencyContext';
 
 export default function SavingsQuickCard() {
   const [stats, setStats] = useState({ jars: 0, goals: 0, total: 0 });
   const { prefs } = useContext(UserContext);
+  const { format } = useCurrency(); // use currency formatting
   const isDark = prefs?.theme === 'dark';
   const { t } = useT();
 
@@ -15,16 +17,6 @@ export default function SavingsQuickCard() {
     const s = t(key);
     return s && s !== key ? s : fallback;
   };
-
-  const currencySymbols = {
-    USD: '$',
-    THB: '฿',
-    EUR: '€',
-    MMK: 'K',
-    GBP: '£',
-  };
-
-  const currencySymbol = currencySymbols[prefs?.currency] || '฿';
 
   useEffect(() => {
     (async () => {
@@ -55,7 +47,7 @@ export default function SavingsQuickCard() {
         <div>{tt("dashboard.goals", "Goals")}: <b>{stats.goals}</b></div>
         <div>
           {tt("dashboard.totalReserved", "Total reserved")}:
-          <b className="text-green-600"> {stats.total.toLocaleString()}{currencySymbol}</b>
+          <b className="text-green-600"> {format(stats.total)}</b>
         </div>
       </div>
 

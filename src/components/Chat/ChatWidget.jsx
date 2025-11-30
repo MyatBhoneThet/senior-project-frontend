@@ -4,21 +4,18 @@ import { API_PATHS } from '../../utils/apiPaths';
 import { UserContext } from '../../context/UserContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import { LuMessageCircle, LuSend, LuX } from 'react-icons/lu';
-
-// NEW: voice input button (adjust path if your folders differ)
 import MicButton from '../../components/Voice/MicButton';
 
 export default function ChatWidget() {
   const { prefs } = useContext(UserContext);
   const isDark = prefs?.theme === 'dark';
-  const { format } = useCurrency(); // ✅ keep your currency formatting
+  const { format } = useCurrency();
 
-  /** ——— visibility tweaks (no structural change) ——— */
   const btnPos = 'left-6';
   const panelPos = 'left-6';
-  const PANEL_WIDTH = 'w-[400px]';      // was 340px
-  const PANEL_MAX_H = 'max-h-[80vh]';   // was 70vh
-  const Z_STACK = 'z-[9999]';           // sits above charts/cards
+  const PANEL_WIDTH = 'w-[400px]';
+  const PANEL_MAX_H = 'max-h-[80vh]';
+  const Z_STACK = 'z-[9999]';
 
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
@@ -87,7 +84,7 @@ export default function ChatWidget() {
             `Totals${where}:`,
             `• Income:  ${format(incomeTHB)}`,
             `• Expenses: ${format(expenseTHB)}`,
-            `• Net:     ${format(netTHB)}`
+            `• Net:     ${format(netTHB)}`,
           ].join('\n');
         }
 
@@ -113,7 +110,6 @@ export default function ChatWidget() {
     handleSend();
   }
 
-  // Quick totals tabs (unchanged; still uses analytics endpoint)
   async function fetchTotal(kind, kRange) {
     const { startDate, endDate } = getDates(kRange);
     try {
@@ -179,7 +175,6 @@ export default function ChatWidget() {
 
   useEffect(() => {
     if (lastKind) fetchTotal(lastKind, range);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [range]);
 
   return (
@@ -285,26 +280,35 @@ export default function ChatWidget() {
             {loading && <div className="text-xs text-gray-400">Working…</div>}
           </div>
 
-          {/* Input */}
-          <form onSubmit={onSubmit} className={`p-3 border-t flex gap-2 ${isDark ? 'border-gray-600' : 'border-gray-200'}`}>
+          {/* Input Area */}
+          <form
+            onSubmit={onSubmit}
+            className={`p-2 border-t flex items-center gap-1 ${isDark ? 'border-gray-600' : 'border-gray-200'}`}
+          >
             <input
+              type="text"
               value={text}
               onChange={(e) => setText(e.target.value)}
               placeholder='Ask: "How much did I spend today?"'
               className={[
-                'flex-1 rounded-lg px-3 py-2 border focus:outline-none focus:ring',
-                isDark ? 'bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400'
+                'flex-1 rounded-lg px-3 py-2 border focus:outline-none focus:ring text-sm',
+                isDark
+                  ? 'bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400'
+                  : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400',
               ].join(' ')}
             />
 
-            {/* NEW: Voice input (append transcript into the same text box) */}
             <MicButton
-              lang="en-US" // change to "th-TH" or "my-MM" if you prefer
-              onFinal={(speech) => { setText(speech); setTimeout(() => handleSend(), 0); }}
+              lang="en-US"
+              onFinal={(speech) => {
+                setText(speech);
+                setTimeout(() => handleSend(), 0);
+              }}
               className={isDark ? 'border-gray-600 text-gray-200' : 'border-gray-300 text-gray-700'}
             />
 
             <button
+              type="submit"
               disabled={loading || !text.trim()}
               className="w-10 h-10 rounded-lg bg-primary text-white disabled:opacity-50 grid place-items-center"
               aria-label="Send"

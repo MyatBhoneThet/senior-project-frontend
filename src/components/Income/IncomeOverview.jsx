@@ -6,14 +6,6 @@ import { useCurrency } from "../../context/CurrencyContext";
 import { UserContext } from "../../context/UserContext";
 import moment from "moment";
 
-const currencySymbols = {
-  USD: '$',
-  THB: '฿',
-  EUR: '€',
-  MMK: 'Ks',
-  GBP: '£',
-};
-
 const IncomeOverview = ({ transactions, onAddIncome }) => {
   const [chartData, setChartData] = useState([]);
   const [selectedMonth, setSelectedMonth] = useState(moment().month());
@@ -23,9 +15,8 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
   const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
   const [totalIncome, setTotalIncome] = useState(0);
 
-  const { convert } = useCurrency();
+  const { convert, format } = useCurrency(); // use format
   const { prefs } = useContext(UserContext);
-  const currencySymbol = currencySymbols[prefs?.currency] || '฿';
   const isDark = prefs?.theme === "dark";
 
   const { t, lang } = useT();
@@ -243,7 +234,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
             }`}
           >
             <div className="h-[200px]">
-              <CustomBarChart data={chartData} currencySymbol={currencySymbol} />
+              <CustomBarChart data={chartData} currencySymbol={format(0).replace(/\d|[.,]/g, '')} />
             </div>
           </div>
         ) : (
@@ -295,7 +286,7 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
             {tt('income.totalIncome','Total Income for this period:')}
           </span>
           <span className="text-xl font-bold text-green-500 text-center">
-            {totalIncome.toLocaleString()}{currencySymbol}
+            {format(totalIncome)}
           </span>
         </div>
       </div>

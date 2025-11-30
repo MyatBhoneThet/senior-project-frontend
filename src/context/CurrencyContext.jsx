@@ -7,8 +7,6 @@ const CurrencyContext = createContext(null);
 
 const STORAGE_KEY = "fxRates_THB_cache_v2";
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
-
-// default provider (latest) – if you already switched to a historical provider, keep your version.
 const FX_URL = "https://open.er-api.com/v6/latest/THB";
 
 const normalizeLang = (v) => {
@@ -18,12 +16,16 @@ const normalizeLang = (v) => {
 };
 
 function numberFormat(amount, currency, lang = "en") {
+  const n = Number(amount) || 0;
+
+  // Force THB to use ฿ symbol
+  if (currency === "THB") return `฿${n.toLocaleString(lang)}`;
+
   try {
-    return new Intl.NumberFormat(lang, { style: "currency", currency }).format(amount);
+    return new Intl.NumberFormat(lang, { style: "currency", currency }).format(n);
   } catch {
-    const symbols = { THB: "฿", USD: "$", MMK: "MMK " };
-    const n = Number(amount) || 0;
-    return `${symbols[currency] || ""}${n.toLocaleString()}`;
+    const symbols = { USD: "$", MMK: "MMK " };
+    return `${symbols[currency] || ""}${n.toLocaleString(lang)}`;
   }
 }
 
@@ -55,7 +57,6 @@ export const CurrencyProvider = ({ children }) => {
   useEffect(() => {
     const stale = Date.now() - (lastUpdated || 0) > ONE_DAY_MS;
     if (!rates?.USD || !rates?.MMK || stale) refreshRates();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lastUpdated]);
 
   const refreshRates = async () => {
@@ -114,7 +115,7 @@ export const CurrencyProvider = ({ children }) => {
       language,
       refreshRates,
       convert,     // THB -> display
-      toBase,      // display -> THB  ✅ for forms
+      toBase,      // display -> THB ✅ for forms
       format,
       symbol,
     }),
@@ -126,11 +127,15 @@ export const CurrencyProvider = ({ children }) => {
 
 export const useCurrency = () =>
   useContext(CurrencyContext) || {
-    rates: { THB: 1 }, lastUpdated: 0, loading: false, error: null,
-    targetCurrency: "THB", language: "en",
+    rates: { THB: 1 },
+    lastUpdated: 0,
+    loading: false,
+    error: null,
+    targetCurrency: "THB",
+    language: "en",
     refreshRates: () => {},
     convert: (x) => x,
     toBase: (x) => x,
-    format: (x) => numberFormat(x, "THB", "en"),
+    format: (x) => `฿${Number(x).toLocaleString("en")}`,
     symbol: () => "฿",
   };

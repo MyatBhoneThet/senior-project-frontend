@@ -2,20 +2,13 @@ import React, { useEffect, useState, useContext } from 'react';
 import CustomPieChart from '../Charts/CustomPieChart';
 import { UserContext } from '../../context/UserContext'; 
 import useT from '../../hooks/useT';
-
-const currencySymbols = {
-  USD: '$',
-  THB: '฿',
-  EUR: '€',
-  MMK: 'K',
-  GBP: '£',
-};
+import { useCurrency } from '../../context/CurrencyContext';
 
 const COLORS = ["#875CF5", "#FA2C37", "#FF6900", "#4f39f6"];
 
 const Last60DaysIncomes = ({ data, totalIncome, isDark }) => {
   const { prefs } = useContext(UserContext);
-  const currencySymbol = currencySymbols[prefs?.currency] || '';
+  const { format } = useCurrency();
   const { t } = useT();
 
   const tt = (key, fallback) => {
@@ -28,36 +21,33 @@ const Last60DaysIncomes = ({ data, totalIncome, isDark }) => {
   useEffect(() => {
     if (data && data.length > 0) {
       const dataArr = data.map(item => ({
-        name: `${item?.source} (${currencySymbol}${item?.amount})`,
+        name: `${item?.source} (${format(item?.amount)})`,
         amount: item?.amount,
       }));
       setChartData(dataArr);
     } else {
       setChartData([]);
     }
-  }, [data, prefs?.currency]);
+  }, [data, prefs?.currency, format]);
 
   if (!chartData || chartData.length === 0) {
     return (
       <div className="card flex items-center justify-center h-48">
         <div className={`text-center ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
           <div className="mb-3">
-            {/* history/finance icon */}
             <svg
-        className={`w-12 h-12 mx-auto ${
-          isDark ? 'text-gray-500' : 'text-gray-400'
-        }`}
-        fill="none"
-        stroke="currentColor"
-        viewBox="0 0 24 24"
-      >
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={1.5}
-          d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-        />
-      </svg>
+              className={`w-12 h-12 mx-auto ${isDark ? 'text-gray-500' : 'text-gray-400'}`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={1.5}
+                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+              />
+            </svg>
           </div>
           <p className="text-sm">{tt('dashboard.noFinanceData', 'No financial data available.')}</p>
         </div>
@@ -74,7 +64,7 @@ const Last60DaysIncomes = ({ data, totalIncome, isDark }) => {
       <CustomPieChart
         data={chartData}
         label={tt('dashboard.totalIncome', 'Total Income')}
-        totalAmount={`${totalIncome}${currencySymbol}`}
+        totalAmount={format(totalIncome)}
         showTextAnchor
         colors={COLORS}
       />

@@ -7,27 +7,24 @@ const TransactionInfoCard = ({
   title,
   icon,
   date,
-  amount,
+  amount = 0,
   type,          // 'income' | 'expense'
   hideDeleteBtn,
   onDelete,
   onEdit,
 }) => {
   const { prefs } = useContext(UserContext) || {};
-  const appCurrency = prefs?.currency || 'THB';
   const isDark = (prefs?.theme || 'light') === 'dark';
+  const { format } = useCurrency();
 
   const renderIcon = () => {
     if (!icon) return <LuUtensils />;
-    if (typeof icon === 'string') {
-      return <img src={icon} alt="icon" className="w-6 h-6 object-contain" />;
-    }
+    if (typeof icon === 'string') return <img src={icon} alt="icon" className="w-6 h-6 object-contain" />;
     return icon;
   };
 
   const sign = type === 'income' ? '+' : '-';
-  const { format } = useCurrency();
-  const formattedAmount = format(Number(amount || 0));
+  const formattedAmount = format(Number(amount || 0)); // currency symbol handled by format()
 
   const getAmountStyles = () =>
     type === 'income'
@@ -36,10 +33,7 @@ const TransactionInfoCard = ({
 
   return (
     <div className={`group relative flex items-center gap-4 mt-2 p-4 rounded-lg shadow-md border transition-shadow duration-300
-      ${isDark
-        ? 'bg-gray-800 border-gray-700/50 hover:bg-gray-700 text-gray-200'
-        : 'bg-white border-gray-200/50 hover:bg-gray-50 text-gray-900'
-      }`}
+      ${isDark ? 'bg-gray-800 border-gray-700/50 hover:bg-gray-700 text-gray-200' : 'bg-white border-gray-200/50 hover:bg-gray-50 text-gray-900'}`}
     >
       {/* Left icon */}
       <div className={`w-12 h-12 flex items-center justify-center text-xl rounded-full drop-shadow-lg

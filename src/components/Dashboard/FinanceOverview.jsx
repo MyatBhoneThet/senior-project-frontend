@@ -85,7 +85,6 @@ const FinanceOverview = ({ totalBalance, totalExpense, totalIncome }) => {
     </p>
   </div>
 </div>
-
       )}
     </div>
   );

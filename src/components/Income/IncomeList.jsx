@@ -30,14 +30,14 @@ const IncomeList = ({ transactions = [], onDelete, onDownload, onEdit }) => {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {transactions.map((income) => (
           <TransactionInfoCard
             key={income._id}
             title={titleFrom(income)}
             icon={income.icon}
             date={income.date ? moment(income.date).format('Do MMM YYYY') : ''}
-            amount={income.amount}
+            amount={Number(income.amount)}   // ensure number
             type="income"
             onDelete={() => onDelete?.(income._id)}
             onEdit={() => onEdit?.(income)}
