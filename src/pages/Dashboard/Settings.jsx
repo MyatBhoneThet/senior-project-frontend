@@ -107,7 +107,7 @@ export default function Settings() {
     } finally { setDeleting(false); }
   };
 
-  const containerClass = isDarkTheme ? 'min-h-screen bg-gray-900 text-gray-100' : 'min-h-screen bg-gray-50 text-gray-900';
+  const containerClass = isDarkTheme ? 'min-h-screen bg-gray-900 rounded-xl text-gray-100' : 'min-h-screen bg-gray-50 text-gray-900';
   const cardClass = isDarkTheme ? 'rounded-lg p-6 border bg-gray-800 border-gray-700 text-gray-200' : 'rounded-lg p-6 border bg-white border-gray-200 text-gray-900';
   const labelBaseClass = isDarkTheme ? 'text-gray-200' : 'text-gray-900';
   const textBaseClass = isDarkTheme ? 'text-gray-400' : 'text-gray-600';

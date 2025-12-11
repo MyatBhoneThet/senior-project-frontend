@@ -50,7 +50,9 @@ export const CurrencyProvider = ({ children }) => {
           setLastUpdated(parsed.lastUpdated || 0);
         }
       }
-    } catch {}
+    } catch {
+        // ignore
+    }
   }, []);
 
   // Refresh if stale/missing

@@ -15,7 +15,7 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
   const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
   const [totalExpense, setTotalExpense] = useState(0);
 
-  const { convert, format } = useCurrency();
+  const { convert, symbol, targetCurrency, language } = useCurrency();
   const { prefs } = useContext(UserContext);
   const isDark = prefs?.theme === "dark";
 
@@ -72,8 +72,26 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
       .sort((a, b) => moment(a.date) - moment(b.date));
 
     setChartData(result);
+    // totalExpense is sum of already-converted amounts
     setTotalExpense(result.reduce((sum, tx) => sum + tx.amount, 0));
   }, [transactions, selectedMonth, selectedYear, lang, convert]);
+
+  // Format amounts that are already in display currency
+  const formatDisplayAmount = (amount) => {
+    try {
+      return new Intl.NumberFormat(language, { 
+        style: "currency", 
+        currency: targetCurrency 
+      }).format(amount);
+    } catch {
+      const symbolMap = { THB: "฿", USD: "$", MMK: "MMK " };
+      const sym = symbolMap[targetCurrency] || targetCurrency;
+      return `${sym}${Number(amount).toLocaleString(language)}`;
+    }
+  };
+
+  // Get currency symbol as a string (same as IncomeOverview)
+  const currencySymbol = typeof symbol === 'function' ? symbol() : symbol || '$';
 
   return (
     <div
@@ -236,7 +254,7 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
             <div className="h-[200px]">
               <CustomLineChart
                 data={chartData}
-                formatLabel={(value) => format(value)}
+                currencySymbol={currencySymbol}
               />
             </div>
           </div>
@@ -289,7 +307,7 @@ const ExpenseOverview = ({ transactions, onAddExpense }) => {
             {tt("expense.totalExpense", "Total Expense for this period:")}
           </span>
           <span className="text-xl font-bold text-rose-500 text-center">
-            {format(totalExpense)}
+            {formatDisplayAmount(totalExpense)}
           </span>
         </div>
       </div>

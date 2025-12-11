@@ -19,8 +19,8 @@ const Statistics = () => {
   const navigate = useNavigate();
   const { t } = useT();
   const tt = (key, fallback) => {
-    const s = t(key);
-    return s && s !== key ? s : fallback;
+    const translated = t(key);
+    return translated && translated !== key ? translated : fallback;
   };
 
   const [dashboardData, setDashboardData] = useState(null);
@@ -33,11 +33,14 @@ const Statistics = () => {
   const fetchDashboardData = async () => {
     if (loading) return;
     setLoading(true);
+
     try {
       const { data } = await axiosInstance.get(API_PATHS.DASHBOARD.GET_DATA);
-      if (data) setDashboardData(data);
+      if (data) {
+        setDashboardData(data);
+      }
     } catch (error) {
-      console.error('Something went wrong. Please Try Again.', error);
+      console.error("Dashboard fetch error:", error);
     } finally {
       setLoading(false);
     }
@@ -56,53 +59,60 @@ const Statistics = () => {
             : 'bg-gray-50 text-gray-900'
         } min-h-screen my-5 mx-auto px-4 lg:px-8`}
       >
-        {/* Responsive grid */}
+
+        {/* Grid Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          
-          {/* RIGHT COLUMN (Charts) — appears first on mobile */}
+
+          {/* RIGHT COLUMN (Charts first on mobile) */}
           <div className="flex flex-col gap-6 order-1 lg:order-2">
-            {/* 📊 Finance Overview */}
+            
+            {/* Finance Overview */}
             <FinanceOverview
               totalBalance={dashboardData?.totalBalance || 0}
               totalIncome={dashboardData?.totalIncome || 0}
               totalExpense={dashboardData?.totalExpenses || 0}
             />
 
-            {/* 📊 Last 30 Days Expenses */}
+            {/* Last 30 Days Expenses */}
             <Last30DaysExpenses
               date={dashboardData?.last30DaysExpenses?.transactions || []}
             />
 
-            {/* 📊 Last 60 Days Incomes */}
+            {/* Last 60 Days Income */}
             <Last60DaysIncomes
               data={
                 dashboardData?.last60DaysIncome?.transactions?.slice(0, 4) || []
               }
               totalIncome={dashboardData?.totalIncome || 0}
             />
+
           </div>
 
-          {/* LEFT COLUMN (History) — appears second on mobile */}
+          {/* LEFT COLUMN (History second on mobile) */}
           <div className="flex flex-col gap-6 order-2 lg:order-1">
-            {/* 🧾 Recent Transactions */}
+
             <RecentTransactions
               title={tt('dashboard.recentTransactions', 'Recent Transactions')}
               transactions={dashboardData?.recentTransactions || []}
               onSeeMore={() => navigate('/expense')}
             />
 
-            {/* 🧾 Recent Expense */}
             <RecentExpense
-              transactions={dashboardData?.last30DaysExpenses?.transactions || []}
+              transactions={
+                dashboardData?.last30DaysExpenses?.transactions || []
+              }
               onSeeMore={() => navigate('/expense')}
             />
 
-            {/* 🧾 Recent Income */}
             <RecentIncome
-              transactions={dashboardData?.last60DaysIncome?.transactions || []}
+              transactions={
+                dashboardData?.last60DaysIncome?.transactions || []
+              }
               onSeeMore={() => navigate('/income')}
             />
+
           </div>
+
         </div>
       </div>
     </DashboardLayout>

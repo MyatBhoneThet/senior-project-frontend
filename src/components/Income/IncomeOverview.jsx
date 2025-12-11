@@ -15,11 +15,11 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
   const [yearDropdownOpen, setYearDropdownOpen] = useState(false);
   const [totalIncome, setTotalIncome] = useState(0);
 
-  const { convert, format } = useCurrency(); // use format
+  const { convert, format, symbol, targetCurrency, language } = useCurrency();
   const { prefs } = useContext(UserContext);
   const isDark = prefs?.theme === "dark";
 
-  const { t, lang } = useT();
+  const { t } = useT();
 
   const monthRef = useRef();
   const yearRef = useRef();
@@ -68,19 +68,40 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
     }
 
     const result = filteredTx
-      .map((tx) => ({
-        date: moment(tx.date).format("YYYY-MM-DD"),
-        amount: convert(tx.amount),
-        category: tx.category || tx.categoryName || "Uncategorized",
-        source: tx.source || "Income",
-      }))
+      .map((tx) => {
+        const convertedAmount = convert(tx.amount);
+        return {
+          date: moment(tx.date).format("YYYY-MM-DD"),
+          amount: convertedAmount,
+          category: tx.category || tx.categoryName || "Uncategorized",
+          source: tx.source || "Income",
+        };
+      })
       .sort((a, b) => moment(a.date) - moment(b.date));
 
     setChartData(result);
 
+    // Calculate total - chartData amounts are already converted to display currency
     const total = result.reduce((sum, tx) => sum + tx.amount, 0);
     setTotalIncome(total);
-  }, [transactions, selectedMonth, selectedYear, lang, convert]);
+  }, [transactions, selectedMonth, selectedYear, convert]);
+
+  // Format the total income in display currency
+  const formatDisplayAmount = (amount) => {
+    try {
+      return new Intl.NumberFormat(language, { 
+        style: "currency", 
+        currency: targetCurrency 
+      }).format(amount);
+    } catch {
+      const symbolMap = { THB: "฿", USD: "$", MMK: "MMK " };
+      const sym = symbolMap[targetCurrency] || targetCurrency;
+      return `${sym}${Number(amount).toLocaleString(language)}`;
+    }
+  };
+
+  // Get currency symbol as a string
+  const currencySymbol = typeof symbol === 'function' ? symbol() : symbol || '$';
 
   return (
     <div
@@ -100,8 +121,11 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
           >
             {tt("income.incomeOverview", "Income Overview")}
           </h1>
-          <p className={`text-sm ${isDark ? "text-gray-400" : "text-gray-500" }`}>
-            {tt("income.text","Track your earnings over time and analyze your income trends.")}
+          <p className={`text-sm ${isDark ? "text-gray-400" : "text-gray-500"}`}>
+            {tt(
+              "income.text",
+              "Track your earnings over time and analyze your income trends."
+            )}
           </p>
         </div>
 
@@ -230,11 +254,14 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
         {chartData.length > 0 ? (
           <div
             className={`rounded-lg p-3 border ${
-            isDark ? "bg-gray-800 border-gray-700": "bg-gray-50 border-gray-200"
+              isDark ? "bg-gray-800 border-gray-700" : "bg-gray-50 border-gray-200"
             }`}
           >
             <div className="h-[200px]">
-              <CustomBarChart data={chartData} currencySymbol={format(0).replace(/\d|[.,]/g, '')} />
+              <CustomBarChart
+                data={chartData}
+                currencySymbol={currencySymbol}
+              />
             </div>
           </div>
         ) : (
@@ -283,10 +310,10 @@ const IncomeOverview = ({ transactions, onAddIncome }) => {
               isDark ? "text-gray-300" : "text-gray-600"
             }`}
           >
-            {tt('income.totalIncome','Total Income for this period:')}
+            {tt("income.totalIncome", "Total Income for this period:")}
           </span>
           <span className="text-xl font-bold text-green-500 text-center">
-            {format(totalIncome)}
+            {formatDisplayAmount(totalIncome)}
           </span>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useContext } from 'react';
+import React, {useContext, useMemo } from 'react';
 import CustomPieChart from '../Charts/CustomPieChart';
 import { UserContext } from '../../context/UserContext'; 
 import useT from '../../hooks/useT';
@@ -6,7 +6,7 @@ import { useCurrency } from '../../context/CurrencyContext';
 
 const COLORS = ["#875CF5", "#FA2C37", "#FF6900", "#4f39f6"];
 
-const Last60DaysIncomes = ({ data, totalIncome, isDark }) => {
+const Last60DaysIncomes = ({ data = [], isDark }) => {
   const { prefs } = useContext(UserContext);
   const { format } = useCurrency();
   const { t } = useT();
@@ -16,19 +16,28 @@ const Last60DaysIncomes = ({ data, totalIncome, isDark }) => {
     return s && s !== key ? s : fallback;
   };
 
-  const [chartData, setChartData] = useState([]);
+  // Build chart data and ensure amounts are numbers
+  const chartData = useMemo(() => {
+    if (!Array.isArray(data) || data.length === 0) return [];
+    return data.map(item => {
+      // ensure numeric amount (handle strings/null)
+      const raw = item?.amount ?? 0;
+      const amount = typeof raw === 'number' ? raw : parseFloat(String(raw).replace(/,/g, '')) || 0;
+      const source = item?.source ?? tt('dashboard.unknownSource', 'Unknown');
+      return {
+        name: `${source} (${format(amount)})`,
+        amount,
+        rawItem: item, // optional if you later need it
+      };
+    });
+  }, [data, prefs?.currency, format, t]);
 
-  useEffect(() => {
-    if (data && data.length > 0) {
-      const dataArr = data.map(item => ({
-        name: `${item?.source} (${format(item?.amount)})`,
-        amount: item?.amount,
-      }));
-      setChartData(dataArr);
-    } else {
-      setChartData([]);
-    }
-  }, [data, prefs?.currency, format]);
+  // Compute total from chartData (sum of amounts)
+  const totalAmountNumber = useMemo(() => {
+    return chartData.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
+  }, [chartData]);
+
+  const totalAmountFormatted = format(totalAmountNumber);
 
   if (!chartData || chartData.length === 0) {
     return (
@@ -64,7 +73,7 @@ const Last60DaysIncomes = ({ data, totalIncome, isDark }) => {
       <CustomPieChart
         data={chartData}
         label={tt('dashboard.totalIncome', 'Total Income')}
-        totalAmount={format(totalIncome)}
+        totalAmount={totalAmountFormatted}
         showTextAnchor
         colors={COLORS}
       />
