@@ -1,12 +1,13 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import AuthLayout from '../../components/layouts/AuthLayout';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import Input from '../../components/Inputs/Input';
 import { validateEmail } from '../../utils/helper';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
 import { UserContext } from '../../context/UserContext';
 import { GoogleLogin } from '@react-oauth/google';
+import { FaGithub } from 'react-icons/fa';
 
 const Login = () => {
   const { prefs, updateUser } = useContext(UserContext);
@@ -18,6 +19,39 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // GitHub OAuth configuration
+  const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID;
+  const REDIRECT_URI = `${window.location.origin}/auth/github/callback`;
+
+  // Handle GitHub OAuth callback
+  useEffect(() => {
+    const handleGitHubCallback = async () => {
+      const params = new URLSearchParams(location.search);
+      const code = params.get('code');
+
+      if (code) {
+        setLoading(true);
+        try {
+          const response = await axiosInstance.post(API_PATHS.AUTH.GITHUB, { code });
+          const { token, user } = response.data;
+
+          if (token) {
+            localStorage.setItem('token', token);
+            updateUser(user);
+            navigate('/dashboard');
+          }
+        } catch (err) {
+          setError(err?.response?.data?.message || 'GitHub sign-in failed. Please try again.');
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    handleGitHubCallback();
+  }, [location, navigate, updateUser]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -75,7 +109,11 @@ const Login = () => {
     }
   };
 
-  // Dynamic background styles
+  const handleGitHubLogin = () => {
+    const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}&scope=user:email`;
+    window.location.href = githubAuthUrl;
+  };
+
   const dynamicBackgroundStyles = {
     background: isDarkTheme
       ? `
@@ -94,7 +132,6 @@ const Login = () => {
     overflow: 'hidden'
   };
 
-  // Floating orbs animation
   const FloatingOrbs = () => (
     <div className="absolute inset-0 overflow-hidden pointer-events-none">
       {[...Array(6)].map((_, i) => (
@@ -115,7 +152,6 @@ const Login = () => {
         />
       ))}
       
-      {/* Animated mesh gradient overlay */}
       <div 
         className="absolute inset-0 opacity-30"
         style={{
@@ -146,7 +182,6 @@ const Login = () => {
     </div>
   );
 
-  // Card styling with glassmorphism
   const cardClass = isDarkTheme
     ? 'bg-gray-900/80 backdrop-blur-xl border border-gray-700/50 text-gray-100 shadow-2xl rounded-2xl p-8 relative z-10'
     : 'bg-white/80 backdrop-blur-xl border border-white/20 text-gray-900 shadow-2xl rounded-2xl p-8 relative z-10';
@@ -159,6 +194,10 @@ const Login = () => {
     ? 'w-full py-3 mt-4 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl'
     : 'w-full py-3 mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl';
 
+  const githubButtonClass = isDarkTheme
+    ? 'w-full py-3 px-4 bg-gray-800 hover:bg-gray-700 border border-gray-600 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2'
+    : 'w-full py-3 px-4 bg-gray-900 hover:bg-gray-800 text-white font-medium rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2';
+
   const textClass = isDarkTheme ? 'text-gray-400' : 'text-gray-600';
   const linkClass = 'text-blue-400 hover:text-blue-300 font-medium underline transition-colors duration-200';
 
@@ -169,7 +208,6 @@ const Login = () => {
     >
       <FloatingOrbs />
       
-      {/* Grid pattern overlay */}
       <div 
         className="absolute inset-0 opacity-20"
         style={{
@@ -240,18 +278,30 @@ const Login = () => {
               <hr className={`flex-1 ${isDarkTheme ? 'border-gray-600/30' : 'border-gray-300/30'}`} />
             </div>
 
-            <div className="w-full flex justify-center">
-              <div className="transform transition-all duration-300 hover:scale-105">
-                <GoogleLogin
-                  onSuccess={handleGoogleSuccess}
-                  onError={() => setError('Google sign-in failed. Please try again.')}
-                  useOneTap={false}
-                  theme={isDarkTheme ? "filled_black" : "outline"}
-                  size="large"
-                  shape="rectangular"
-                  text="signin_with"
-                />
+            <div className="space-y-3">
+              <div className="w-full flex justify-center">
+                <div className="transform transition-all duration-300 hover:scale-105">
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => setError('Google sign-in failed. Please try again.')}
+                    useOneTap={false}
+                    theme={isDarkTheme ? "filled_black" : "outline"}
+                    size="large"
+                    shape="rectangular"
+                    text="signin_with"
+                  />
+                </div>
               </div>
+
+              <button
+                type="button"
+                onClick={handleGitHubLogin}
+                className={githubButtonClass}
+                disabled={loading}
+              >
+                <FaGithub className="text-xl" />
+                Continue with GitHub
+              </button>
             </div>
           </form>
 
@@ -263,7 +313,7 @@ const Login = () => {
           </p>
         </div>
 
-        <style >{`
+        <style>{`
           @keyframes fade-in-up {
             from {
               opacity: 0;

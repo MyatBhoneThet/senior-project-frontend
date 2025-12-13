@@ -1,8 +1,8 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-
 import Login from './pages/Auth/Login';
 import SignUp from './pages/Auth/SignUp';
+import GitHubCallback from './pages/Auth/GitHubCallback';
 import Home from './pages/Dashboard/Home';
 import Statistics from './pages/Dashboard/Statistics';
 import Income from './pages/Dashboard/Income';
@@ -11,7 +11,6 @@ import Settings from './pages/Dashboard/Settings';
 import ProfilePage from './pages/Dashboard/ProfilePage';
 import RecurringPage from './pages/Dashboard/Recurring';
 import SavingsPage from './pages/Dashboard/Savings'; 
-
 import UserProvider from './context/UserContext';
 import { CurrencyProvider } from './context/CurrencyContext';
 import { Toaster } from 'react-hot-toast';
@@ -31,7 +30,6 @@ const Root = () => {
 const App = () => {
   return (
     <UserProvider>
-      {/* Keep BrowserRouter in main.jsx only. CurrencyProvider goes inside UserProvider. */}
       <CurrencyProvider>
         <Routes>
           {/* Landing */}
@@ -40,6 +38,9 @@ const App = () => {
           {/* Public auth routes */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
+          
+          {/* GitHub OAuth callback route */}
+          <Route path="/auth/github/callback" element={<GitHubCallback />} />
 
           {/* Protected app routes */}
           <Route
@@ -56,7 +57,8 @@ const App = () => {
               <ProtectedRoute>
                 <Statistics />
               </ProtectedRoute>
-            } />
+            } 
+          />
           <Route
             path="/income"
             element={
@@ -97,7 +99,7 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-          {/* ADDED: Savings (Goals & Jars) */}
+          {/* Savings (Goals & Jars) */}
           <Route
             path="/savings"
             element={
@@ -106,11 +108,11 @@ const App = () => {
               </ProtectedRoute>
             }
           />
-
+          
           {/* Fallback */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-
+        
         <Toaster
           toastOptions={{
             className: '',

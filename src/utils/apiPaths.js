@@ -9,6 +9,7 @@ export const API_PATHS = {
     LOGIN: "/api/v1/auth/login",
     REGISTER: "/api/v1/auth/register",
     GOOGLE: "/api/v1/auth/google",
+    GITHUB: '/api/v1/auth/github',
     CHANGE_PASSWORD: "/api/v1/auth/change-password",
     GET_USER_INFO: "/api/v1/auth/me",
   },
