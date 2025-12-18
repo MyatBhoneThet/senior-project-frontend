@@ -1,6 +1,5 @@
-export const BASE_URL =
-  import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
-
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+// export const BASE_URL = "http://localhost:8000"
 // ✅ Helper to build full API URLs
 export const apiUrl = (path) => `${BASE_URL}${path}`;
 

@@ -3,7 +3,7 @@ import useT from "../../hooks/useT";
 
 const BulkDeleteExpense = ({ isOpen, onClose, onConfirm, isDarkTheme }) => {
   const [bulkDeletePeriod, setBulkDeletePeriod] = useState('all');
-  const { t, lang } = useT();
+  const { t } = useT();
   
   if (!isOpen) return null;
 

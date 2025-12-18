@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useContext } from "react";
+import React, { useEffect, useRef, useState, useContext, useMemo } from "react";
 import DashboardLayout from "../../components/layouts/DashboardLayout";
 import ExpenseOverview from "../../components/Expense/ExpenseOverview";
 import ExpenseList from "../../components/Expense/ExpenseList";
@@ -13,13 +13,31 @@ import { useUserAuth } from "../../hooks/useUserAuth";
 import { syncRecurring } from "../../utils/syncRecurring";
 import FilterControl from "../../components/common/FilterControl";
 import { UserContext } from "../../context/UserContext";
+import { useCurrency } from "../../context/CurrencyContext";
 import useT from "../../hooks/useT";
 
 const Expense = () => {
   useUserAuth();
+
   const { prefs } = useContext(UserContext);
   const isDarkTheme = prefs?.theme === "dark";
   const { t } = useT();
+
+  /* ✅ Currency (same as Income.jsx) */
+  const { targetCurrency, language } = useCurrency();
+
+  const format = useMemo(() => {
+    return (amount) => {
+      try {
+        return new Intl.NumberFormat(language, {
+          style: "currency",
+          currency: targetCurrency,
+        }).format(amount);
+      } catch {
+        return `${targetCurrency} ${Number(amount).toLocaleString(language)}`;
+      }
+    };
+  }, [language, targetCurrency]);
 
   const [expenseData, setExpenseData] = useState([]);
   const [filteredExpense, setFilteredExpense] = useState([]);
@@ -39,7 +57,7 @@ const Expense = () => {
     return val && val !== key ? val : fallback;
   };
 
-  /** Fetch all expense details */
+  /* ================= FETCH ================= */
   const fetchExpenseDetails = async () => {
     if (loading) return;
     setLoading(true);
@@ -52,22 +70,24 @@ const Expense = () => {
       setFilteredExpense(list);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to load expenses. Please try again.");
+      toast.error(tt("expense.text5", "Failed to load expenses."));
     } finally {
       if (mounted.current) setLoading(false);
     }
   };
 
-  /** Add Expense */
+  /* ================= ADD ================= */
   const handleAddExpense = async (expense) => {
     const { source, categoryId, categoryName, amount, date, icon } = expense;
-    if (!source?.trim()) return toast.error(tt('expense.text1','Source is required.'));
-    if (!amount || isNaN(amount) || Number(amount) <= 0) return toast.error(tt('expense.text2','Amount must be greater than 0.'));
-    if (!date) return toast.error(tt('expense.text3','Date is required.'));
+
+    if (!source?.trim()) return toast.error(tt("expense.text1", "Source is required."));
+    if (!amount || isNaN(amount) || Number(amount) <= 0)
+      return toast.error(tt("expense.text2", "Amount must be greater than 0."));
+    if (!date) return toast.error(tt("expense.text3", "Date is required."));
 
     try {
       await axiosInstance.post(API_PATHS.EXPENSE.ADD_EXPENSE, {
-        source: (source || "").trim(),
+        source: source.trim(),
         categoryId: categoryId || undefined,
         category: categoryName || undefined,
         amount: Number(amount),
@@ -77,65 +97,69 @@ const Expense = () => {
 
       await syncRecurring({ silent: false });
       setOpenAddExpenseModal(false);
-      toast.success(tt('expense.text4',"Expense added successfully."));
+      toast.success(tt("expense.text4", "Expense added successfully."));
       fetchExpenseDetails();
     } catch (error) {
       console.error(error?.response?.data || error);
-      toast.error(error?.response?.data?.message || tt('expense.text5','Something went wrong.'));
+      toast.error(error?.response?.data?.message || tt("expense.text5", "Something went wrong."));
     }
   };
 
-  /** Update Expense */
+  /* ================= UPDATE ================= */
   const handleUpdateExpense = async (payload) => {
     if (!selectedExpense?._id) return;
+
     try {
-      await axiosInstance.put(API_PATHS.EXPENSE.UPDATE_EXPENSE(selectedExpense._id), {
-        source: (payload.source || "").trim(),
-        categoryId: payload.categoryId || undefined,
-        category: payload.categoryName || undefined,
-        amount: Number(payload.amount),
-        date: payload.date,
-        icon: payload.icon || "",
-      });
+      await axiosInstance.put(
+        API_PATHS.EXPENSE.UPDATE_EXPENSE(selectedExpense._id),
+        {
+          source: (payload.source || "").trim(),
+          categoryId: payload.categoryId || undefined,
+          category: payload.categoryName || undefined,
+          amount: Number(payload.amount),
+          date: payload.date,
+          icon: payload.icon || "",
+        }
+      );
 
       setOpenEditExpenseModal(false);
       setSelectedExpense(null);
-      toast.success(tt('expense.text6','Expense updated successfully.'));
+      toast.success(tt("expense.text6", "Expense updated successfully."));
       fetchExpenseDetails();
     } catch (error) {
       console.error(error?.response?.data || error);
-      toast.error(error?.response?.data?.message || tt('expense.text7',"Update failed."));
+      toast.error(error?.response?.data?.message || tt("expense.text7", "Update failed."));
     }
   };
 
-  /** Delete Single Expense */
+  /* ================= DELETE ================= */
   const deleteExpense = async (id) => {
     try {
       await axiosInstance.delete(API_PATHS.EXPENSE.DELETE_EXPENSE(id));
       await syncRecurring({ silent: false });
       setOpenDeleteAlert({ show: false, data: null });
-      toast.success(tt('expense.text8',"Expense deleted successfully."));
+      toast.success(tt("expense.text8", "Expense deleted successfully."));
       fetchExpenseDetails();
     } catch (error) {
       console.error(error?.response?.data || error);
-      toast.error(error?.response?.data?.message || (tt('expense.text5',"Something went wrong.")));
+      toast.error(error?.response?.data?.message || tt("expense.text5", "Something went wrong."));
     }
   };
 
-  /** Bulk Delete Expenses */
+  /* ================= BULK DELETE ================= */
   const handleBulkDelete = async (period) => {
     try {
       const data = await BulkDeleteExpense(period);
       setOpenBulkDeleteModal(false);
-      toast.success(data.message || tt('expense.text8',"Expense deleted successfully."));
+      toast.success(data.message || tt("expense.text8", "Expense deleted successfully."));
       fetchExpenseDetails();
     } catch (error) {
       console.error(error);
-      toast.error(error.message || tt('expense.text5','Something went wrong.'));
+      toast.error(error.message || tt("expense.text5", "Something went wrong."));
     }
   };
 
-  /** Download Expense Excel */
+  /* ================= DOWNLOAD ================= */
   const handleDownloadExpenseDetails = async () => {
     try {
       const response = await axiosInstance.get(API_PATHS.EXPENSE.DOWNLOAD_EXCEL, {
@@ -151,11 +175,11 @@ const Expense = () => {
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error(error);
-      toast.error(tt('expense.text9','Something went wrong while downloading.'));
+      toast.error(tt("expense.text9", "Something went wrong while downloading."));
     }
   };
 
-  /** Initial Mount */
+  /* ================= INIT ================= */
   useEffect(() => {
     mounted.current = true;
     fetchExpenseDetails();
@@ -164,25 +188,24 @@ const Expense = () => {
     };
   }, []);
 
-  // Theming
   const containerClass = isDarkTheme
-    ? "min-h-screen bg-gray-900 text-gray-100 transition-colors duration-300"
-    : "min-h-screen bg-gray-50 text-gray-900 transition-colors duration-300";
+    ? "min-h-screen bg-gray-900 text-gray-100"
+    : "min-h-screen bg-gray-50 text-gray-900";
 
   const cardClass = isDarkTheme
-    ? "bg-gray-800 border border-gray-700 text-gray-200"
-    : "bg-white border border-gray-200 text-gray-900";
+    ? "bg-gray-800 border border-gray-700"
+    : "bg-white border border-gray-200";
 
   return (
     <DashboardLayout activeMenu="Expense">
       <div className={`my-5 mx-auto ${containerClass}`}>
         <div className="grid grid-cols-1 gap-6">
-
-          {/* Overview Chart */}
+          {/* Overview */}
           <div className={`${cardClass} rounded-xl p-4`}>
             <ExpenseOverview
               transactions={expenseData}
               onAddExpense={() => setOpenAddExpenseModal(true)}
+              format={format}
             />
           </div>
 
@@ -190,10 +213,11 @@ const Expense = () => {
           <div className="flex items-center justify-end gap-3">
             <button
               onClick={() => setOpenBulkDeleteModal(true)}
-              className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
+              className="px-4 py-2 rounded-lg bg-red-600 text-white hover:bg-red-700"
             >
-              {tt('expense.bulkDelete','Bulk Delete')}
+              {tt("expense.bulkDelete", "Bulk Delete")}
             </button>
+
             <FilterControl
               items={expenseData}
               fieldMap={{
@@ -203,11 +227,11 @@ const Expense = () => {
                 text: "source",
               }}
               onChange={(list) => setFilteredExpense(list)}
-              label={tt('expense.filter',"Filter")}
+              label={tt("expense.filter", "Filter")}
             />
           </div>
 
-          {/* Expense List */}
+          {/* List */}
           <div className={`${cardClass} rounded-xl p-4`}>
             <ExpenseList
               transactions={filteredExpense}
@@ -221,7 +245,7 @@ const Expense = () => {
           </div>
         </div>
 
-        {/* Add Expense Modal */}
+        {/* Add */}
         <Modal
           isOpen={openAddExpenseModal}
           onClose={() => setOpenAddExpenseModal(false)}
@@ -230,7 +254,7 @@ const Expense = () => {
           <AddExpenseForm onAddExpense={handleAddExpense} mode="add" />
         </Modal>
 
-        {/* Edit Expense Modal */}
+        {/* Edit */}
         <Modal
           isOpen={openEditExpenseModal}
           onClose={() => setOpenEditExpenseModal(false)}
@@ -243,7 +267,7 @@ const Expense = () => {
           />
         </Modal>
 
-        {/* Delete Single Expense Modal */}
+        {/* Delete */}
         <Modal
           isOpen={openDeleteAlert.show}
           onClose={() => setOpenDeleteAlert({ show: false, data: null })}
@@ -255,7 +279,7 @@ const Expense = () => {
           />
         </Modal>
 
-        {/* Bulk Delete Modal */}
+        {/* Bulk Delete */}
         <Modal
           isOpen={openBulkDeleteModal}
           onClose={() => setOpenBulkDeleteModal(false)}
