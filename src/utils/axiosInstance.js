@@ -3,13 +3,11 @@ import axios from 'axios';
 import { BASE_URL } from './apiPaths';
 
 const axiosInstance = axios.create({
-  baseURL: BASE_URL, // ✅ http://localhost:8000
+  baseURL: BASE_URL, // http://localhost:8000 || render link
   timeout: 30000,
 });
 
-/* =======================
-   REQUEST INTERCEPTOR
-======================= */
+// REQUEST INTERCEPTOR
 axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem('token');
@@ -41,9 +39,8 @@ axiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-/* =======================
-   RESPONSE INTERCEPTOR
-======================= */
+
+// RESPONSE INTERCEPTOR
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
