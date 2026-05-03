@@ -6,6 +6,7 @@ import PageShell from '../../components/Dashboard/PageShell';
 import Modal from '../../components/layout/Modal';
 import DebtForm from '../../components/Debts/DebtForm';
 import DebtList from '../../components/Debts/DebtList';
+import { StatCardSkeleton } from '../../components/Dashboard/DashboardSkeleton';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
 import { UserContext } from '../../context/UserContext';
@@ -173,6 +174,9 @@ export default function DebtsPage() {
           return (
           <div key={card.label} className={`relative overflow-hidden rounded-[24px] border p-5 ${statClass}`}>
             <div className={`pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full blur-3xl ${card.accent.includes('rose') ? 'bg-[#fb7185]/15' : 'bg-[#d9ff34]/12'}`} />
+            {loading ? (
+              <StatCardSkeleton isDark={isDark} />
+            ) : (
             <div className="relative flex items-start justify-between gap-3">
               <div>
                 <div className={`text-[11px] font-medium tracking-[0.12em] ${isDark ? 'text-[#7b8095]' : 'text-[#6b7080]'}`}>{card.label}</div>
@@ -182,6 +186,7 @@ export default function DebtsPage() {
                 <Icon className={`text-xl ${card.accent}`} />
               </div>
             </div>
+            )}
           </div>
         )})}
       </div>
@@ -195,12 +200,8 @@ export default function DebtsPage() {
           onFilterChange={(view) => setFilters({ view })}
           isDark={isDark}
           currentUserId={userId}
+          loading={loading}
         />
-        {loading ? (
-          <div className={`rounded-[24px] border p-5 ${statClass}`}>
-            Loading records...
-          </div>
-        ) : null}
       </div>
 
       <Modal

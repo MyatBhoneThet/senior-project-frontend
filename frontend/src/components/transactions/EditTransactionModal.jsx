@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
+import { SkeletonBlock } from '../Dashboard/DashboardSkeleton';
 
 export default function EditTransactionModal({ id, open, onClose, onSaved }){
   const [model, setModel] = useState(null);
@@ -29,7 +30,21 @@ export default function EditTransactionModal({ id, open, onClose, onSaved }){
   }
 
   if (!open) return null;
-  if (!model) return <div className="modal">Loading...</div>;
+  if (!model) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-black/40">
+        <div className="w-[480px] max-w-[92vw] rounded-2xl bg-white p-4">
+          <SkeletonBlock isDark={false} className="h-6 w-40 rounded-lg" />
+          <div className="mt-5 space-y-3">
+            <SkeletonBlock isDark={false} className="h-12 w-full rounded-xl" />
+            <SkeletonBlock isDark={false} className="h-12 w-full rounded-xl" />
+            <SkeletonBlock isDark={false} className="h-12 w-full rounded-xl" />
+            <SkeletonBlock isDark={false} className="h-20 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center">

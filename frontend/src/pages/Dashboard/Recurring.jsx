@@ -203,6 +203,7 @@ export default function RecurringPage() {
           annualRecurring={annualRecurring}
           rules={rules}
           tt={tt}
+          isLoading={loading}
         />
 
         <RecurringRulesSection

@@ -1,6 +1,7 @@
 import React from 'react';
 import { LuPause, LuPlay, LuTrash2 } from 'react-icons/lu';
 import { repeatLabel, whenText } from './recurringViewHelpers';
+import { ListSkeleton } from '../Dashboard/DashboardSkeleton';
 
 const RecurringRuleRow = ({
   rule,
@@ -90,7 +91,7 @@ const RecurringRulesSection = ({
 
     <div className="pt-5">
       {loading ? (
-        <div className={`py-10 text-sm ${mutedText}`}>{tt('common.loading', 'Loading...')}</div>
+        <ListSkeleton rows={5} isDark={isDark} />
       ) : rules.length === 0 ? (
         <div className={`py-10 text-sm ${mutedText}`}>{tt('recurring.noRules', 'No recurring rules yet.')}</div>
       ) : (

@@ -407,6 +407,7 @@ const Expense = () => {
           cardClass={cardClass}
           labelText={labelText}
           mutedText={mutedText}
+          isLoading={loading}
         />
 
         <ExpenseOverviewPanel
@@ -427,6 +428,7 @@ const Expense = () => {
           overviewStats={overviewStats}
           format={format}
           overviewLineData={overviewLineData}
+          isLoading={loading}
         />
 
         <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
@@ -448,6 +450,7 @@ const Expense = () => {
             }}
             onOpenDelete={(id) => setOpenDeleteAlert({ show: true, data: id })}
             tt={tt}
+            isLoading={loading}
           />
 
           <ExpensePacePanel
@@ -460,6 +463,7 @@ const Expense = () => {
             maxPace={maxPace}
             dashboardData={dashboardData}
             tt={tt}
+            isLoading={loading}
           />
         </div>
 

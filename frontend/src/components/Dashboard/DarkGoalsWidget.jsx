@@ -2,8 +2,9 @@ import React, { useContext } from 'react';
 import { LuTarget } from 'react-icons/lu';
 import { UserContext } from '../../context/UserContext';
 import useT from '../../hooks/useT';
+import { CompactRowsSkeleton, SkeletonBlock } from './DashboardSkeleton';
 
-const DarkGoalsWidget = ({ goals, totalGoals }) => {
+const DarkGoalsWidget = ({ goals, totalGoals, isLoading = false }) => {
   const { prefs } = useContext(UserContext) || {};
   const isDark = prefs?.theme === 'dark';
   const defaultGoals = Array.isArray(goals) ? goals : [];
@@ -36,13 +37,19 @@ const DarkGoalsWidget = ({ goals, totalGoals }) => {
 
       <div className="relative z-10 flex justify-between items-center mb-4">
         <h3 className={`text-[13px] font-semibold tracking-[0.1em] ${isDark ? 'text-gray-100' : 'text-[#11131b]'}`}>{tt('dashboard.goals', 'Goals')}</h3>
-        <span className="px-2 py-0.5 bg-[#a3e635]/14 text-[#a3e635] text-[10px] tracking-widest rounded">
-          {(typeof totalGoals === 'number' ? totalGoals : defaultGoals.length)} {tt('dashboard.active', 'Active')}
-        </span>
+        {isLoading ? (
+          <SkeletonBlock isDark={isDark} className="h-5 w-16 rounded" />
+        ) : (
+          <span className="px-2 py-0.5 bg-[#a3e635]/14 text-[#a3e635] text-[10px] tracking-widest rounded">
+            {(typeof totalGoals === 'number' ? totalGoals : defaultGoals.length)} {tt('dashboard.active', 'Active')}
+          </span>
+        )}
       </div>
 
       <div className="relative z-10 flex flex-col gap-4 flex-1 justify-center">
-        {defaultGoals.length > 0 ? (
+        {isLoading ? (
+          <CompactRowsSkeleton rows={3} isDark={isDark} />
+        ) : defaultGoals.length > 0 ? (
           defaultGoals.map((g, idx) => (
             <div key={idx} className="flex flex-col gap-1.5">
               <div className="flex justify-between items-center">

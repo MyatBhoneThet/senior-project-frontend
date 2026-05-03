@@ -9,6 +9,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts';
+import { ChartSkeleton, SkeletonBlock } from '../Dashboard/DashboardSkeleton';
 
 const ExpenseOverviewPanel = ({
   isDark,
@@ -28,6 +29,7 @@ const ExpenseOverviewPanel = ({
   overviewStats,
   format,
   overviewLineData,
+  isLoading = false,
 }) => (
   <div className={`mt-5 rounded-[24px] border p-6 ${cardClass}`}>
     <div className={`flex flex-col gap-4 border-b pb-5 lg:flex-row lg:items-center lg:justify-between ${sectionDivider}`}>
@@ -78,24 +80,36 @@ const ExpenseOverviewPanel = ({
     <div className={`grid grid-cols-2 gap-4 border-b py-5 md:grid-cols-4 ${sectionDivider}`}>
       <div>
         <div className={`text-xs tracking-[0.12em] ${labelText}`}>{tt('expense.totalPeriod', 'Total Period')}</div>
-        <div className="mt-2 text-2xl font-bold text-[#ff6b81]">{format(overviewStats.total)}</div>
+        {isLoading ? <SkeletonBlock isDark={isDark} className="mt-3 h-7 w-28 rounded-lg" /> : (
+          <div className="mt-2 text-2xl font-bold text-[#ff6b81]">{format(overviewStats.total)}</div>
+        )}
       </div>
       <div>
         <div className={`text-xs tracking-[0.12em] ${labelText}`}>{tt('expense.transactionsCount', 'Transactions')}</div>
-        <div className={`mt-2 text-2xl font-bold ${isDark ? 'text-white' : 'text-[#11131b]'}`}>{overviewStats.transactions}</div>
+        {isLoading ? <SkeletonBlock isDark={isDark} className="mt-3 h-7 w-16 rounded-lg" /> : (
+          <div className={`mt-2 text-2xl font-bold ${isDark ? 'text-white' : 'text-[#11131b]'}`}>{overviewStats.transactions}</div>
+        )}
       </div>
       <div>
         <div className={`text-xs tracking-[0.12em] ${labelText}`}>{tt('expense.highestSingle', 'Highest Single')}</div>
-        <div className={`mt-2 text-2xl font-bold ${isDark ? 'text-white' : 'text-[#11131b]'}`}>{format(overviewStats.highest)}</div>
+        {isLoading ? <SkeletonBlock isDark={isDark} className="mt-3 h-7 w-24 rounded-lg" /> : (
+          <div className={`mt-2 text-2xl font-bold ${isDark ? 'text-white' : 'text-[#11131b]'}`}>{format(overviewStats.highest)}</div>
+        )}
       </div>
       <div>
         <div className={`text-xs tracking-[0.12em] ${labelText}`}>{tt('expense.average', 'Average')}</div>
-        <div className={`mt-2 text-2xl font-bold ${isDark ? 'text-white' : 'text-[#11131b]'}`}>{format(overviewStats.average)}</div>
+        {isLoading ? <SkeletonBlock isDark={isDark} className="mt-3 h-7 w-24 rounded-lg" /> : (
+          <div className={`mt-2 text-2xl font-bold ${isDark ? 'text-white' : 'text-[#11131b]'}`}>{format(overviewStats.average)}</div>
+        )}
       </div>
     </div>
 
     <div className="pt-8">
-      {overviewLineData.length ? (
+      {isLoading ? (
+        <div className="h-[280px]">
+          <ChartSkeleton isDark={isDark} />
+        </div>
+      ) : overviewLineData.length ? (
         <div className="h-[280px]">
           <div className="h-[220px] w-full">
             <ResponsiveContainer width="100%" height="100%">

@@ -1,5 +1,6 @@
 import React from 'react';
 import { LuChevronDown, LuPlus } from 'react-icons/lu';
+import { ChartSkeleton, SkeletonBlock } from '../Dashboard/DashboardSkeleton';
 
 const IncomeOverviewPanel = ({
   isDark,
@@ -19,6 +20,7 @@ const IncomeOverviewPanel = ({
   overviewStats,
   format,
   overviewChartBars,
+  isLoading = false,
 }) => (
   <div className={`mt-5 rounded-[24px] border p-6 ${cardClass}`}>
     <div className={`flex flex-col gap-4 border-b pb-5 lg:flex-row lg:items-center lg:justify-between ${sectionDivider}`}>
@@ -79,38 +81,42 @@ const IncomeOverviewPanel = ({
         <div className={`text-xs tracking-[0.12em] ${labelText}`}>
           {tt('income.totalPeriod', 'Total Period')}
         </div>
-        <div className={`mt-2 text-2xl font-bold ${isDark ? 'text-[#d9ff34]' : 'text-[#84cc16]'}`}>
-          {format(overviewStats.total)}
-        </div>
+        {isLoading ? <SkeletonBlock isDark={isDark} className="mt-3 h-7 w-28 rounded-lg" /> : (
+          <div className={`mt-2 text-2xl font-bold ${isDark ? 'text-[#d9ff34]' : 'text-[#84cc16]'}`}>{format(overviewStats.total)}</div>
+        )}
       </div>
       <div>
         <div className={`text-xs tracking-[0.12em] ${labelText}`}>
           {tt('income.transactionsCount', 'Transactions')}
         </div>
-        <div className={`mt-2 text-2xl font-bold ${isDark ? 'text-white' : 'text-[#11131b]'}`}>
-          {overviewStats.transactions}
-        </div>
+        {isLoading ? <SkeletonBlock isDark={isDark} className="mt-3 h-7 w-16 rounded-lg" /> : (
+          <div className={`mt-2 text-2xl font-bold ${isDark ? 'text-white' : 'text-[#11131b]'}`}>{overviewStats.transactions}</div>
+        )}
       </div>
       <div>
         <div className={`text-xs tracking-[0.12em] ${labelText}`}>
           {tt('income.highestSingle', 'Highest Single')}
         </div>
-        <div className={`mt-2 text-2xl font-bold ${isDark ? 'text-white' : 'text-[#11131b]'}`}>
-          {format(overviewStats.highest)}
-        </div>
+        {isLoading ? <SkeletonBlock isDark={isDark} className="mt-3 h-7 w-24 rounded-lg" /> : (
+          <div className={`mt-2 text-2xl font-bold ${isDark ? 'text-white' : 'text-[#11131b]'}`}>{format(overviewStats.highest)}</div>
+        )}
       </div>
       <div>
         <div className={`text-xs tracking-[0.12em] ${labelText}`}>
           {tt('income.average', 'Average')}
         </div>
-        <div className={`mt-2 text-2xl font-bold ${isDark ? 'text-white' : 'text-[#11131b]'}`}>
-          {format(overviewStats.average)}
-        </div>
+        {isLoading ? <SkeletonBlock isDark={isDark} className="mt-3 h-7 w-24 rounded-lg" /> : (
+          <div className={`mt-2 text-2xl font-bold ${isDark ? 'text-white' : 'text-[#11131b]'}`}>{format(overviewStats.average)}</div>
+        )}
       </div>
     </div>
 
     <div className="pt-8">
-      {overviewChartBars.length ? (
+      {isLoading ? (
+        <div className="h-[260px]">
+          <ChartSkeleton isDark={isDark} />
+        </div>
+      ) : overviewChartBars.length ? (
         <div className="h-[260px]">
           <div className="relative flex h-[210px] items-end gap-2 overflow-x-auto pb-2">
             {overviewChartBars.map((bar) => (

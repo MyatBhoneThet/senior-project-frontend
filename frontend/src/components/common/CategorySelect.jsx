@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axiosInstance from '../../utils/axiosInstance';
+import { SkeletonBlock } from '../Dashboard/DashboardSkeleton';
 
 export default function CategorySelect({
   type,                 // "expense" | "income"
@@ -72,9 +73,7 @@ export default function CategorySelect({
 
   if (loading) {
     return (
-      <div className={[inputBase, isDark ? darkInput : lightInput, 'opacity-70'].join(' ')}>
-        Loading categories…
-      </div>
+      <SkeletonBlock isDark={isDark} className="h-11 w-full rounded-md" />
     );
   }
 

@@ -2,6 +2,7 @@ import React, { useContext } from 'react';
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from 'recharts';
 import { UserContext } from '../../context/UserContext';
 import useT from '../../hooks/useT';
+import { DonutSkeleton } from './DashboardSkeleton';
 
 const CustomTooltip = ({ active, payload, isDark }) => {
   if (active && payload && payload.length) {
@@ -19,7 +20,7 @@ const CustomTooltip = ({ active, payload, isDark }) => {
   return null;
 };
 
-const DarkSpendingChart = ({ data, format }) => {
+const DarkSpendingChart = ({ data, format, isLoading = false }) => {
   const { prefs } = useContext(UserContext) || {};
   const isDark = prefs?.theme === 'dark';
   const themeGreen = isDark ? '#a3e635' : '#84cc16';
@@ -49,7 +50,9 @@ const DarkSpendingChart = ({ data, format }) => {
         <span className={`text-[10px] tracking-widest ${isDark ? 'text-gray-500' : 'text-[#6b7080]'}`}>{tt('dashboard.byCategory', 'By category')}</span>
       </div>
 
-      {coloredData.length === 0 ? (
+      {isLoading ? (
+        <DonutSkeleton isDark={isDark} />
+      ) : coloredData.length === 0 ? (
         <div className={`flex flex-1 items-center justify-center text-[11px] font-medium tracking-widest ${isDark ? 'text-gray-500' : 'text-[#6b7080]'}`}>
           {tt('dashboard.noSpendingData', 'No spending data')}
         </div>

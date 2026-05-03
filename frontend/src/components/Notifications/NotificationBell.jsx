@@ -4,6 +4,7 @@ import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
 import { useSocketContext } from '../../context/SocketContext';
 import toast from 'react-hot-toast';
+import { ListSkeleton } from '../Dashboard/DashboardSkeleton';
 
 export default function NotificationBell({ isDark }) {
   const { unreadCounts, latestNotification, refreshUnreadCounts } = useSocketContext() || {};
@@ -105,8 +106,8 @@ export default function NotificationBell({ isDark }) {
 
           <div className="mt-4 max-h-[420px] space-y-3 overflow-y-auto pr-1">
             {loading ? (
-              <div className={`rounded-3xl border border-dashed p-4 text-sm ${isDark ? 'border-white/10 text-white/55' : 'border-slate-200 text-slate-500'}`}>
-                Loading...
+              <div className={`rounded-3xl border p-4 ${isDark ? 'border-white/10 bg-white/[0.03]' : 'border-slate-200 bg-slate-50'}`}>
+                <ListSkeleton rows={3} isDark={isDark} />
               </div>
             ) : notifications.length === 0 ? (
               <div className={`rounded-3xl border border-dashed p-4 text-sm ${isDark ? 'border-white/10 text-white/55' : 'border-slate-200 text-slate-500'}`}>

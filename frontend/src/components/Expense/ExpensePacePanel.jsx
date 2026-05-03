@@ -1,4 +1,5 @@
 import React from 'react';
+import { CompactRowsSkeleton, SkeletonBlock } from '../Dashboard/DashboardSkeleton';
 
 const ExpensePacePanel = ({
   isDark,
@@ -10,6 +11,7 @@ const ExpensePacePanel = ({
   maxPace,
   dashboardData,
   tt,
+  isLoading = false,
 }) => (
   <aside className={`rounded-[24px] border p-6 ${cardClass}`}>
     <div className="mb-6 flex items-center justify-between">
@@ -22,7 +24,9 @@ const ExpensePacePanel = ({
     </div>
 
     <div className="space-y-5">
-      {monthlyPace.length ? (
+      {isLoading ? (
+        <CompactRowsSkeleton rows={4} isDark={isDark} />
+      ) : monthlyPace.length ? (
         monthlyPace.map((item) => (
           <div key={item.label}>
             <div className="mb-2 flex items-center justify-between gap-4">
@@ -46,10 +50,17 @@ const ExpensePacePanel = ({
 
     <div className={`mt-8 rounded-2xl border p-5 ${subtleSurface}`}>
       <div className={`text-xs tracking-[0.12em] ${mutedText}`}>{tt('expense.allTimeTotal', 'All-time total')}</div>
-      <div className={`mt-2 text-2xl font-bold ${isDark ? 'text-white' : 'text-[#11131b]'}`}>{format(dashboardData?.totalExpenses || 0)}</div>
-      <div className={`mt-3 text-sm ${mutedText}`}>
-        {tt('expense.netBalance', 'Net balance:')} {format(dashboardData?.totalBalance || 0)}
-      </div>
+      {isLoading ? (
+        <>
+          <SkeletonBlock isDark={isDark} className="mt-3 h-7 w-32 rounded-lg" />
+          <SkeletonBlock isDark={isDark} className="mt-4 h-3 w-40 rounded" />
+        </>
+      ) : (
+        <>
+          <div className={`mt-2 text-2xl font-bold ${isDark ? 'text-white' : 'text-[#11131b]'}`}>{format(dashboardData?.totalExpenses || 0)}</div>
+          <div className={`mt-3 text-sm ${mutedText}`}>{tt('expense.netBalance', 'Net balance:')} {format(dashboardData?.totalBalance || 0)}</div>
+        </>
+      )}
     </div>
   </aside>
 );

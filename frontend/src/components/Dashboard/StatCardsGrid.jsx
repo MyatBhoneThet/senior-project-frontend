@@ -1,6 +1,7 @@
 import React from 'react';
+import { StatCardSkeleton } from './DashboardSkeleton';
 
-const StatCardsGrid = ({ statCards, isDark, topCardClass, labelText, mutedText, updatedNowText }) => (
+const StatCardsGrid = ({ statCards, isDark, topCardClass, labelText, mutedText, updatedNowText, isLoading = false }) => (
   <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
     {statCards.map((card) => {
       const Icon = card.icon;
@@ -17,6 +18,11 @@ const StatCardsGrid = ({ statCards, isDark, topCardClass, labelText, mutedText, 
                 : 'bg-[linear-gradient(135deg,rgba(255,255,255,0.26),transparent_36%,transparent)]'
             }`}
           />
+          {isLoading ? (
+            <div className="relative z-10">
+              <StatCardSkeleton isDark={isDark} />
+            </div>
+          ) : (
           <div className="relative flex h-full flex-col">
             <div className="flex items-start justify-between gap-4">
               <div>
@@ -41,6 +47,7 @@ const StatCardsGrid = ({ statCards, isDark, topCardClass, labelText, mutedText, 
               <span className={`text-[11px] ${mutedText}`}>{updatedNowText}</span>
             </div>
           </div>
+          )}
         </div>
       );
     })}

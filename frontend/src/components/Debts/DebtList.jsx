@@ -1,7 +1,8 @@
 import React from 'react';
 import DebtStatusBadge from './DebtStatusBadge';
+import { ListSkeleton } from '../Dashboard/DashboardSkeleton';
 
-export default function DebtList({ debts, selectedId, onSelect, filters, onFilterChange, isDark, currentUserId }) {
+export default function DebtList({ debts, selectedId, onSelect, filters, onFilterChange, isDark, currentUserId, loading = false }) {
   const cardClass = isDark
     ? 'border-white/10 bg-white/[0.05] text-white shadow-[0_24px_90px_rgba(0,0,0,0.35)] ring-1 ring-white/[0.08] backdrop-blur-2xl'
     : 'border-white/28 bg-white/28 text-[#11131b] shadow-[0_24px_90px_rgba(15,23,42,0.08)] ring-1 ring-white/45 backdrop-blur-3xl';
@@ -43,7 +44,11 @@ export default function DebtList({ debts, selectedId, onSelect, filters, onFilte
       </div>
 
       <div className={`mt-5 overflow-hidden rounded-[22px] border ${isDark ? 'border-white/10 bg-black/5' : 'border-white/45 bg-white/35'}`}>
-        {debts.length === 0 ? (
+        {loading ? (
+          <div className="p-5">
+            <ListSkeleton rows={5} isDark={isDark} />
+          </div>
+        ) : debts.length === 0 ? (
           <div className={`rounded-2xl border border-dashed p-6 text-sm ${isDark ? 'border-white/10 text-white/55' : 'border-white/50 text-slate-500'}`}>
             No debt records yet. Create one above.
           </div>

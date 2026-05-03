@@ -5,6 +5,7 @@ import { useSocketContext } from '../../context/SocketContext';
 import { UserContext } from '../../context/UserContext';
 import toast from 'react-hot-toast';
 import { LuBellRing, LuSend, LuX } from 'react-icons/lu';
+import { ListSkeleton, SkeletonBlock } from '../Dashboard/DashboardSkeleton';
 
 function formatRelativeTime(value) {
   if (!value) return '';
@@ -194,9 +195,13 @@ export default function ChatPanel({
               Conversation
             </div>
             <h4 className="mt-1 text-lg font-semibold">{title}</h4>
-            <span className={`mt-0.5 block text-xs ${isDark ? 'text-white/45' : 'text-slate-500'}`}>
-              {loading ? 'Loading...' : 'Live conversation'}
-            </span>
+            {loading ? (
+              <SkeletonBlock isDark={isDark} className="mt-2 h-3 w-28 rounded" />
+            ) : (
+              <span className={`mt-0.5 block text-xs ${isDark ? 'text-white/45' : 'text-slate-500'}`}>
+                Live conversation
+              </span>
+            )}
           </div>
           <button
             type="button"
@@ -219,7 +224,9 @@ export default function ChatPanel({
             isDark ? 'border-white/10 bg-black/10' : 'border-white/50 bg-white/45'
           }`}
         >
-          {messages.length === 0 ? (
+          {loading ? (
+            <ListSkeleton rows={4} isDark={isDark} />
+          ) : messages.length === 0 ? (
             <div className={`rounded-3xl border border-dashed p-4 text-sm ${isDark ? 'border-white/10 text-white/55' : 'border-slate-200 text-slate-500'}`}>
               No messages yet.
             </div>

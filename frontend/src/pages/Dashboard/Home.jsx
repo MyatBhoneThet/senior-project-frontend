@@ -41,6 +41,8 @@ const Home = () => {
 
   const [dashboardData, setDashboardData] = useState(null);
   const [selectedPeriod, setSelectedPeriod] = useState('M');
+  const [isDashboardLoading, setIsDashboardLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const formatDayLabel = (date) =>
     date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
@@ -52,11 +54,14 @@ const Home = () => {
     let active = true;
 
     const load = async () => {
+      setIsDashboardLoading(true);
       try {
         const { data } = await axiosInstance.get(API_PATHS.DASHBOARD.GET_DATA(selectedPeriod));
         if (active) setDashboardData(data || null);
       } catch (error) {
         console.error('Dashboard fetch error:', error);
+      } finally {
+        if (active) setIsDashboardLoading(false);
       }
     };
 
@@ -64,7 +69,7 @@ const Home = () => {
     return () => {
       active = false;
     };
-  }, [selectedPeriod]);
+  }, [selectedPeriod, refreshKey]);
 
   const pct = (value, total) => {
     if (!total) return 0;
@@ -301,11 +306,16 @@ const Home = () => {
           labelText={labelText}
           mutedText={mutedText}
           updatedNowText={tt('dashboard.updatedNow', 'Updated now')}
+          isLoading={isDashboardLoading}
         />
 
         <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.7fr)_minmax(300px,1fr)]">
           <div className="grid grid-cols-1 gap-4">
-            <DarkCashFlowChart data={cashFlowData} valueFormatter={(value) => format(value)} />
+            <DarkCashFlowChart
+              data={cashFlowData}
+              valueFormatter={(value) => format(value)}
+              isLoading={isDashboardLoading}
+            />
 
             <QuickActionsPanel
               quickActions={quickActions}
@@ -322,12 +332,13 @@ const Home = () => {
             transactions={dashboardData?.recentTransactions || []}
             onSeeAll={() => navigate('/expense')}
             formatAmount={(amount, type) => `${type === 'income' ? '+' : '-'}${format(Math.abs(Number(amount || 0)))}`}
+            isLoading={isDashboardLoading}
           />
         </div>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <DarkSpendingChart data={spendingData} format={format} />
-          <DarkIncomeChart data={incomeData} format={format} />
+          <DarkSpendingChart data={spendingData} format={format} isLoading={isDashboardLoading} />
+          <DarkIncomeChart data={incomeData} format={format} isLoading={isDashboardLoading} />
         </div>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
@@ -337,7 +348,8 @@ const Home = () => {
             labelText={labelText}
             dashboardData={dashboardData}
             format={format}
-            onRefresh={() => navigate('/dashboard')}
+            onRefresh={() => setRefreshKey((key) => key + 1)}
+            isLoading={isDashboardLoading}
             texts={{
               focusMetrics: tt('dashboard.focusMetrics', 'Focus Metrics'),
               refreshView: tt('dashboard.refreshView', 'Refresh View'),
@@ -347,11 +359,20 @@ const Home = () => {
             }}
           />
 
-          <DarkRecurringWidget recurring={mappedRecurring} totalAmount={dashboardData?.recurring?.monthlyTotal || 0} format={format} />
+          <DarkRecurringWidget
+            recurring={mappedRecurring}
+            totalAmount={dashboardData?.recurring?.monthlyTotal || 0}
+            format={format}
+            isLoading={isDashboardLoading}
+          />
         </div>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-          <DarkGoalsWidget goals={mappedGoals} totalGoals={dashboardData?.goals?.active ?? dashboardData?.goals?.total ?? 0} />
+          <DarkGoalsWidget
+            goals={mappedGoals}
+            totalGoals={dashboardData?.goals?.active ?? dashboardData?.goals?.total ?? 0}
+            isLoading={isDashboardLoading}
+          />
 
           <SystemStatusPanel
             isDark={isDark}
@@ -359,6 +380,7 @@ const Home = () => {
             labelText={labelText}
             mutedText={mutedText}
             dashboardData={dashboardData}
+            isLoading={isDashboardLoading}
             texts={{
               systemStatus: tt('dashboard.systemStatus', 'System Status'),
               budgetSignal: tt('dashboard.budgetSignal', 'Budget signal'),

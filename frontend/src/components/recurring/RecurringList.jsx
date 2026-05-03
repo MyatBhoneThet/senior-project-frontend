@@ -4,6 +4,7 @@ import { API_PATHS } from '../../utils/apiPaths';
 import RecurringForm from './RecurringForm';
 import { UserContext } from '../../context/UserContext';
 import useT from '../../hooks/useT';
+import { ListSkeleton } from '../Dashboard/DashboardSkeleton';
 
 export default function RecurringList() {
   const { prefs } = useContext(UserContext);
@@ -126,8 +127,8 @@ export default function RecurringList() {
           <h3 className="text-base font-medium">{tt('recurring.yourRules', 'Your Rules')}</h3>
         </div>
         {loading ? (
-          <div className={`p-4 text-sm ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>
-            {tt('recurring.loading', 'Loading…')}
+          <div className="p-4">
+            <ListSkeleton rows={4} isDark={isDark} />
           </div>
         ) : rules.length === 0 ? (
           <div className={`p-4 text-sm ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>

@@ -3,6 +3,7 @@ import { LuShoppingCart, LuCoffee, LuMusic, LuCloud, LuWallet } from 'react-icon
 import { UserContext } from '../../context/UserContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import useT from '../../hooks/useT';
+import { ListSkeleton } from './DashboardSkeleton';
 
 const getIconForCategory = (category, type) => {
   if (type === 'income') return <LuWallet className="text-[#a3e635]" />;
@@ -18,6 +19,7 @@ const DarkRecentTransactions = ({
   onSeeAll,
   formatAmount = (amount, type) =>
     `${type === 'income' ? '+' : '-'}$${Math.abs(Number(amount || 0)).toFixed(2)}`,
+  isLoading = false,
 }) => {
   const { prefs } = useContext(UserContext) || {};
   const { format } = useCurrency();
@@ -44,7 +46,9 @@ const DarkRecentTransactions = ({
       </div>
 
       <div className="flex flex-col gap-3 overflow-y-auto scrollbar-none pb-2 h-full">
-        {transactions?.length > 0 ? (
+        {isLoading ? (
+          <ListSkeleton rows={5} isDark={isDark} />
+        ) : transactions?.length > 0 ? (
           transactions.map((t, idx) => (
             <div key={idx} className={`-mx-2 flex items-center justify-between rounded-xl p-1.5 transition-colors group cursor-pointer ${isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-black/[0.03]'}`}>
               <div className="flex items-center gap-3">

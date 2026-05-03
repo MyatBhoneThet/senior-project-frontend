@@ -2,6 +2,7 @@ import React from 'react';
 import { LuDownload, LuPencil, LuTrash2 } from 'react-icons/lu';
 import FilterControl from '../common/FilterControl';
 import { categoryLabel, renderIncomeIcon, shortDateLabel, sourceTitle } from './incomeViewHelpers';
+import { ListSkeleton } from '../Dashboard/DashboardSkeleton';
 
 const IncomeSourcesSection = ({
   isDark,
@@ -18,6 +19,7 @@ const IncomeSourcesSection = ({
   onOpenEdit,
   onOpenDelete,
   tt,
+  isLoading = false,
 }) => (
   <section className={`rounded-[24px] border p-6 ${cardClass}`}>
     <div className={`flex flex-col gap-3 border-b pb-5 lg:flex-row lg:items-center lg:justify-between ${sectionDivider}`}>
@@ -62,7 +64,9 @@ const IncomeSourcesSection = ({
     </div>
 
     <div className="pt-5">
-      {visibleSources.length ? (
+      {isLoading ? (
+        <ListSkeleton rows={6} isDark={isDark} />
+      ) : visibleSources.length ? (
         visibleSources.map((item, index) => (
           <div key={item._id} className={index === 0 ? '' : `border-t ${isDark ? 'border-white/12' : 'border-black/10'}`}>
             <div className="flex flex-col gap-2 py-3 md:flex-row md:items-center md:justify-between">

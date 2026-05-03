@@ -9,6 +9,7 @@ import {
   ResponsiveContainer
 } from 'recharts';
 import { UserContext } from '../../context/UserContext';
+import { ChartSkeleton } from './DashboardSkeleton';
 
 const CustomTooltip = ({ active, payload, label, valueFormatter, isDark }) => {
   if (active && payload && payload.length) {
@@ -32,6 +33,7 @@ const DarkCashFlowChart = ({
   data,
   valueFormatter = (value) => `$${Number(value || 0).toFixed(0)}`,
   yTickFormatter = (value) => value,
+  isLoading = false,
 }) => {
   const { prefs } = useContext(UserContext) || {};
   const isDark = prefs?.theme === 'dark';
@@ -56,7 +58,9 @@ const DarkCashFlowChart = ({
         </div>
       </div>
 
-      {chartData.length === 0 ? (
+      {isLoading ? (
+        <ChartSkeleton isDark={isDark} />
+      ) : chartData.length === 0 ? (
         <div className={`flex flex-1 items-center justify-center text-[11px] font-bold uppercase tracking-widest ${isDark ? 'text-gray-500' : 'text-[#6b7080]'}`}>
           No transaction data
         </div>

@@ -463,6 +463,7 @@ const Income = () => {
           cardClass={cardClass}
           labelText={labelText}
           mutedText={mutedText}
+          isLoading={loading}
         />
 
         <IncomeOverviewPanel
@@ -483,6 +484,7 @@ const Income = () => {
           overviewStats={overviewStats}
           format={format}
           overviewChartBars={overviewChartBars}
+          isLoading={loading}
         />
 
         <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(320px,1fr)]">
@@ -504,6 +506,7 @@ const Income = () => {
             }}
             onOpenDelete={(id) => setOpenDeleteAlert({ show: true, data: id })}
             tt={tt}
+            isLoading={loading}
           />
 
           <IncomePacePanel
@@ -516,6 +519,7 @@ const Income = () => {
             maxPace={maxPace}
             dashboardData={dashboardData}
             tt={tt}
+            isLoading={loading}
           />
         </div>
 

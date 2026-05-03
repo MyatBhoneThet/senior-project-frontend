@@ -2,8 +2,9 @@ import React, { useContext } from 'react';
 import { UserContext } from '../../context/UserContext';
 import { useCurrency } from '../../context/CurrencyContext';
 import useT from '../../hooks/useT';
+import { ListSkeleton, SkeletonBlock } from './DashboardSkeleton';
 
-const DarkRecurringWidget = ({ recurring, totalAmount, format }) => {
+const DarkRecurringWidget = ({ recurring, totalAmount, format, isLoading = false }) => {
   const { prefs } = useContext(UserContext) || {};
   const { format: formatCurrency } = useCurrency();
   const isDark = prefs?.theme === 'dark';
@@ -34,13 +35,19 @@ const DarkRecurringWidget = ({ recurring, totalAmount, format }) => {
 
       <div className="relative z-10 flex justify-between items-center mb-4">
         <h3 className={`text-[13px] font-medium tracking-[0.1em] ${isDark ? 'text-gray-100' : 'text-[#11131b]'}`}>{tt('menu.recurring', 'Recurring')}</h3>
-        <span className="text-[10px] tracking-widest text-[#fb7185] uppercase">
-          {resolvedFormat(totalAmount)} {tt('dashboard.perMonth', '/ mo')}
-        </span>
+        {isLoading ? (
+          <SkeletonBlock isDark={isDark} className="h-3 w-24 rounded" />
+        ) : (
+          <span className="text-[10px] tracking-widest text-[#fb7185] uppercase">
+            {resolvedFormat(totalAmount)} {tt('dashboard.perMonth', '/ mo')}
+          </span>
+        )}
       </div>
 
       <div className="relative z-10 flex flex-col gap-3 flex-1 justify-center">
-        {defaultRecurring.length > 0 ? (
+        {isLoading ? (
+          <ListSkeleton rows={4} isDark={isDark} />
+        ) : defaultRecurring.length > 0 ? (
           defaultRecurring.map((r, idx) => (
           <div key={idx} className={`-mx-1 flex items-center justify-between rounded p-1 transition-colors group cursor-pointer ${isDark ? 'hover:bg-white/[0.02]' : 'hover:bg-black/[0.03]'}`}>
             <div className="flex items-center gap-2.5">

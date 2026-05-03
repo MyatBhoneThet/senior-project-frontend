@@ -4,6 +4,7 @@ import { LuArrowLeft } from 'react-icons/lu';
 import DashboardLayout from '../../components/layout/DashboardLayout';
 import PageShell from '../../components/Dashboard/PageShell';
 import DebtDetailsPanel from '../../components/Debts/DebtDetailsPanel';
+import { ListSkeleton, SkeletonBlock } from '../../components/Dashboard/DashboardSkeleton';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
 import { UserContext } from '../../context/UserContext';
@@ -114,8 +115,20 @@ export default function DebtRecordPage() {
         </button>
 
         {loading ? (
-          <div className={`rounded-[24px] border p-5 ${panelClass}`}>
-            Loading record...
+          <div className={`space-y-4 rounded-[24px] border p-5 ${panelClass}`}>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <SkeletonBlock isDark={isDark} className="h-6 w-44 rounded-lg" />
+                <SkeletonBlock isDark={isDark} className="mt-3 h-3 w-72 max-w-full rounded" />
+              </div>
+              <SkeletonBlock isDark={isDark} className="h-11 w-11 rounded-2xl" />
+            </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <SkeletonBlock isDark={isDark} className="h-24 rounded-[20px]" />
+              <SkeletonBlock isDark={isDark} className="h-24 rounded-[20px]" />
+              <SkeletonBlock isDark={isDark} className="h-24 rounded-[20px]" />
+            </div>
+            <ListSkeleton rows={3} isDark={isDark} />
           </div>
         ) : debt ? (
           <DebtDetailsPanel

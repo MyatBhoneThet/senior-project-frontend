@@ -1,4 +1,5 @@
 import React from 'react';
+import { SkeletonBlock } from '../Dashboard/DashboardSkeleton';
 
 const GeneralSettingsPanel = ({
   isDark,
@@ -79,10 +80,19 @@ const GeneralSettingsPanel = ({
         </select>
 
         <div className={`mt-3 rounded-2xl border p-4 text-sm ${labelText} ${subtleSurface}`}>
-          <div>
-            1 THB ≈ {rates?.USD ? rates.USD.toFixed(4) : '...'} USD • {rates?.MMK ? Math.round(rates.MMK).toLocaleString() : '...'} MMK
-          </div>
-          <div className="mt-1">{tt('settings.updatedAt', 'Updated')}: {last}</div>
+          {loading ? (
+            <>
+              <SkeletonBlock isDark={isDark} className="h-4 w-72 max-w-full rounded" />
+              <SkeletonBlock isDark={isDark} className="mt-2 h-3 w-44 rounded" />
+            </>
+          ) : (
+            <>
+              <div>
+                1 THB ≈ {rates?.USD ? rates.USD.toFixed(4) : '...'} USD • {rates?.MMK ? Math.round(rates.MMK).toLocaleString() : '...'} MMK
+              </div>
+              <div className="mt-1">{tt('settings.updatedAt', 'Updated')}: {last}</div>
+            </>
+          )}
           <button
             type="button"
             onClick={onRefreshRates}

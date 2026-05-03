@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { LuArrowDown, LuArrowUp, LuCalendarDays, LuPlus, LuTrash2, LuWallet } from 'react-icons/lu';
 import DashboardLayout from '../../components/layout/DashboardLayout';
+import { CompactRowsSkeleton, ListSkeleton, StatCardSkeleton } from '../../components/Dashboard/DashboardSkeleton';
 import axiosInstance from '../../utils/axiosInstance';
 import { API_PATHS } from '../../utils/apiPaths';
 import { useCurrency } from '../../context/CurrencyContext';
@@ -30,6 +31,7 @@ export default function SavingsPage() {
   const [jars, setJars] = useState([]);
   const [newJarName, setNewJarName] = useState('');
   const [creatingJar, setCreatingJar] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [activeView, setActiveView] = useState('jars');
   const [jarAmounts, setJarAmounts] = useState({});
   const [title, setTitle] = useState('');
@@ -43,6 +45,7 @@ export default function SavingsPage() {
   const [creating, setCreating] = useState(false);
 
   const load = async () => {
+    setLoading(true);
     try {
       const [{ data: gs }, { data: js }] = await Promise.all([
         axiosInstance.get(API_PATHS.GOALS.BASE),
@@ -55,6 +58,8 @@ export default function SavingsPage() {
       if (!jarId && jarList[0]) setJarId(jarList[0]._id);
     } catch (e) {
       toast.error(e?.response?.data?.message || e.message || tt('savings.loadFailed', 'Failed to load goals/jars'));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -272,24 +277,34 @@ export default function SavingsPage() {
           <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
             <div className={`relative overflow-hidden rounded-[22px] border p-6 ${cardClass}`}>
               <div className={`pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-gradient-radial to-transparent blur-3xl opacity-60 ${isDark ? 'from-[#d9ff34]/20' : 'from-[#84cc16]/20'}`} />
+              {loading ? <StatCardSkeleton isDark={isDark} /> : (
+              <>
               <div className={`mb-4 text-[13px] font-semibold ${labelText}`}>{tt('savings.totalSaved', 'Total Saved')}</div>
               <div className={`text-4xl font-bold tracking-tight ${isDark ? 'text-[#d9ff34]' : 'text-[#84cc16]'}`}>{format(totalSaved)}</div>
               <div className={`mt-3 text-xs ${mutedText}`}>{tt('savings.across', 'Across')} {activeGoals.length} {tt('savings.goals', 'goals')}</div>
               <div className={`mt-6 inline-flex rounded-xl px-4 py-2 text-sm font-bold ${isDark ? 'bg-[#d9ff34]/10 text-[#d9ff34]' : 'bg-[#84cc16]/10 text-[#84cc16]'}`}>
                 {activeGoals.length} {tt('savings.goalsActive', 'goals active')}
               </div>
+              </>
+              )}
             </div>
 
             <div className={`relative overflow-hidden rounded-[22px] border p-6 ${cardClass}`}>
+              {loading ? <StatCardSkeleton isDark={isDark} /> : (
+              <>
               <div className={`mb-4 text-[13px] font-semibold ${labelText}`}>{tt('savings.reservedThisMonth', 'Reserved This Month')}</div>
               <div className={`text-4xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-[#11131b]'}`}>{format(reservedThisMonth)}</div>
               <div className={`mt-3 text-xs ${mutedText}`}>{tt('savings.autoAllocatedFixedAmount', 'Auto-allocated fixed amount')}</div>
               <div className="mt-6 inline-flex rounded-xl bg-[#8b5cf6]/10 px-4 py-2 text-sm font-bold text-[#8b5cf6]">
                 {activeGoals.filter((goal) => goal.autoAllocate?.enabled).length} {tt('savings.autoAllocateEnabled', 'auto-allocate enabled')}
               </div>
+              </>
+              )}
             </div>
 
             <div className={`relative overflow-hidden rounded-[22px] border p-6 ${cardClass}`}>
+              {loading ? <StatCardSkeleton isDark={isDark} /> : (
+              <>
               <div className={`mb-4 text-[13px] font-semibold ${labelText}`}>{tt('savings.nearestDeadline', 'Nearest Deadline')}</div>
               <div className="text-4xl font-bold tracking-tight text-[#fbbf24]">
                 {nearestDeadline ? formatDeadlineLabel(nearestDeadline.targetDate) : tt('savings.noDeadlineShort', '—')}
@@ -300,6 +315,8 @@ export default function SavingsPage() {
               <div className="mt-6 inline-flex rounded-xl bg-[#fbbf24]/10 px-4 py-2 text-sm font-bold text-[#fbbf24]">
                 {nearestDeadline ? tt('savings.upcomingTarget', 'Upcoming target') : tt('savings.noDeadline', 'No deadline')}
               </div>
+              </>
+              )}
             </div>
           </div>
 
@@ -342,7 +359,11 @@ export default function SavingsPage() {
             </form>
 
             <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {jars.map((jar) => {
+              {loading ? (
+                <div className="col-span-full">
+                  <ListSkeleton rows={4} isDark={isDark} />
+                </div>
+              ) : jars.map((jar) => {
                 const amount = jarAmounts[jar._id] || '';
                 const balance = Number(jar.balance || 0);
                 return (
@@ -400,7 +421,7 @@ export default function SavingsPage() {
                 );
               })}
 
-              {jars.length === 0 && (
+              {!loading && jars.length === 0 && (
                 <div className={`col-span-full py-8 text-sm ${mutedText}`}>
                   {tt('savings.noJars', 'No jars yet. Create one above.')}
                 </div>
@@ -416,7 +437,11 @@ export default function SavingsPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
-              {goalCards.length ? (
+              {loading ? (
+                <div className={`col-span-full rounded-[24px] border p-5 ${cardClass}`}>
+                  <CompactRowsSkeleton rows={4} isDark={isDark} />
+                </div>
+              ) : goalCards.length ? (
                 goalCards.map((goal) => (
                   <div
                     key={goal._id}

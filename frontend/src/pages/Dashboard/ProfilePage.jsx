@@ -175,6 +175,7 @@ export default function ProfilePage() {
             tt={tt}
             onUpload={handleUpload}
             onRemove={handleRemovePhoto}
+            loading={loading}
           />
 
           <ProfileInfoForm
@@ -188,6 +189,7 @@ export default function ProfilePage() {
             tt={tt}
             onSubmit={handleSubmit}
             setField={setField}
+            loading={loading}
           />
         </div>
       </ProfilePageShell>
